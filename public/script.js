@@ -1,9 +1,10 @@
- const messageBox = document.querySelector("textarea");
+const messageBox = document.querySelector("textarea");
 const checkButton = document.querySelector("button");
 const resultBox = document.querySelector(".result");
 const riskLevel = document.querySelector(".risk-level");
+const analysis = document.querySelector(".analysis");
 
-checkButton.addEventListener("click", function () {
+checkButton.addEventListener("click", async function () {
 
     const message = messageBox.value.trim();
 
@@ -12,42 +13,66 @@ checkButton.addEventListener("click", function () {
         return;
     }
 
-    let risk = 0;
-
-    const scamWords = [
-        "urgent",
-        "otp",
-        "password",
-        "click here",
-        "verify",
-        "bank",
-        "winner",
-        "prize",
-        "account blocked",
-        "send money"
-    ];
-
-    scamWords.forEach(function (word) {
-        if (message.toLowerCase().includes(word)) {
-            risk += 10;
-        }
-    });
-
-    if (risk > 100) {
-        risk = 100;
-    }
+    checkButton.disabled = true;
+    checkButton.textContent = "🔍 Checking...";
 
     resultBox.style.display = "block";
-    riskLevel.style.width = risk + "%";
+    analysis.textContent = "AI is analyzing the message...";
 
-    if (risk >= 50) {
+    try {
+
+        const response = await fetch("/check-message", {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                message: message
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Something went wrong.");
+        }
+
+        const risk = data.risk;
+
+        riskLevel.style.width = risk + "%";
+
+        if (risk >= 70) {
+
+            resultBox.querySelector("h2").textContent =
+                "🚨 High Scam Risk: " + risk + "%";
+
+        } else if (risk >= 30) {
+
+            resultBox.querySelector("h2").textContent =
+                "⚠️ Possible Scam: " + risk + "%";
+
+        } else {
+
+            resultBox.querySelector("h2").textContent =
+                "✅ Low Scam Risk: " + risk + "%";
+        }
+
+        analysis.textContent = data.explanation;
+
+    } catch (error) {
+
+        console.error(error);
+
         resultBox.querySelector("h2").textContent =
-            "🚨 High Scam Risk: " + risk + "%";
-    } else if (risk > 0) {
-        resultBox.querySelector("h2").textContent =
-            "⚠️ Possible Scam: " + risk + "%";
-    } else {
-        resultBox.querySelector("h2").textContent =
-            "✅ Low Scam Risk: " + risk + "%";
+            "❌ Error";
+
+        analysis.textContent =
+            "Unable to analyze the message. Please check your server and API key.";
+
     }
+
+    checkButton.disabled = false;
+    checkButton.textContent = "🔍 Check Message";
 });

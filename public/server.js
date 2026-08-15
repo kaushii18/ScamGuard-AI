@@ -1,22 +1,17 @@
-require("dotenv").config();
-
 const express = require("express");
 const OpenAI = require("openai");
 
 const app = express();
 const PORT = 3000;
 
-// Middleware
 app.use(express.json());
 app.use(express.static("public"));
 
-// DeepSeek client
 const client = new OpenAI({
     apiKey: process.env.DEEPSEEK_API_KEY,
     baseURL: "https://api.deepseek.com"
 });
 
-// ScamGuard AI API
 app.post("/check-message", async (req, res) => {
 
     try {
@@ -30,42 +25,30 @@ app.post("/check-message", async (req, res) => {
         }
 
         const completion = await client.chat.completions.create({
+
             model: "deepseek-chat",
 
             messages: [
                 {
                     role: "system",
                     content: `
-You are ScamGuard AI.
+You are ScamGuard AI, an AI assistant that detects scam messages.
 
-Analyze the user's message and determine whether it is safe,
-suspicious, or a scam.
-
-Return ONLY valid JSON in this exact format:
+Analyze the user's message and return ONLY valid JSON:
 
 {
-  "risk": 0,
-  "explanation": "Short explanation of why this message is safe or suspicious."
+  "risk": number,
+  "explanation": "short explanation"
 }
 
-Risk rules:
-0-29 = Low risk
-30-69 = Suspicious
-70-100 = High scam risk
-
-Look for:
-- Urgent or threatening language
-- Requests for OTP, password or personal information
-- Suspicious links
-- Requests to send money
-- Fake prizes or rewards
-- Account blocking threats
-- Impersonation
-- Unusual payment requests
-- Other scam indicators
-
-Do not automatically call a message a scam just because it contains
-words such as "OTP", "bank", or "verify". Consider the complete context.
+Rules:
+- risk must be between 0 and 100.
+- 0-29 = low risk
+- 30-69 = suspicious
+- 70-100 = high scam risk
+- Look for urgency, requests for OTP/passwords,
+  suspicious links, money requests, fake prizes,
+  account threats, impersonation and other scam signals.
 `
                 },
 
@@ -78,7 +61,6 @@ words such as "OTP", "bank", or "verify". Consider the complete context.
 
         const result = completion.choices[0].message.content;
 
-        // Remove Markdown code fences if DeepSeek adds them
         const cleanedResult = result
             .replace(/```json/g, "")
             .replace(/```/g, "")
@@ -86,10 +68,7 @@ words such as "OTP", "bank", or "verify". Consider the complete context.
 
         const data = JSON.parse(cleanedResult);
 
-        res.json({
-            risk: Math.max(0, Math.min(100, Number(data.risk))),
-            explanation: data.explanation
-        });
+        res.json(data);
 
     } catch (error) {
 
@@ -101,9 +80,10 @@ words such as "OTP", "bank", or "verify". Consider the complete context.
     }
 });
 
-// Start server
 app.listen(PORT, () => {
+
     console.log(
-        `🛡️ ScamGuard AI server is running at http://localhost:${PORT}`
+        `ScamGuard AI server is running at http://localhost:${PORT}`
     );
+
 });
