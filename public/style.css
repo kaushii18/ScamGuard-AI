@@ -111,3 +111,35 @@ button:hover {
         font-size: 40px;
     }
 }
+
+#clearButton {
+    margin-left: 10px;
+    background: #555;
+}
+
+#clearButton:hover {
+    background: #333;
+}
+#clearButton:hover {
+    background: #333;
+}
+
+
+/* Message / Email Options */
+
+.scan-options {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.scan-options button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 25px;
+}
+
+.scan-options button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
