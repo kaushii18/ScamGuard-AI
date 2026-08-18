@@ -1,4 +1,13 @@
-const messageBox = document.querySelector("textarea");
+const messageBox = document.querySelector("#messageBox");
+const emailBody = document.querySelector("#emailBody");
+
+const senderEmail = document.querySelector("#senderEmail");
+const emailSubject = document.querySelector("#emailSubject");
+const emailLink = document.querySelector("#emailLink");
+
+const messageScanner = document.querySelector("#messageScanner");
+const emailScanner = document.querySelector("#emailScanner");
+
 const checkButton = document.querySelector("#checkButton");
 const clearButton = document.querySelector("#clearButton");
 
@@ -14,13 +23,26 @@ const emailOption = document.querySelector("#emailOption");
 
 // Message is selected by default
 messageOption.classList.add("active");
+emailScanner.style.display = "none";
+messageScanner.style.display = "block";
 
 
 /* =========================
-   CHECK MESSAGE
+   CHECK BUTTON
 ========================= */
 
 checkButton.addEventListener("click", async function () {
+
+    // For now, only Message scanner uses AI
+    // Email AI verification will be added in Step 5B+
+
+    if (emailOption.classList.contains("active")) {
+
+        alert("📧 Email scanner UI is ready! Email verification will be connected next.");
+
+        return;
+    }
+
 
     const message = messageBox.value.trim();
 
@@ -34,6 +56,7 @@ checkButton.addEventListener("click", async function () {
 
     resultBox.style.display = "block";
     analysis.textContent = "AI is analyzing the message...";
+
 
     try {
 
@@ -49,11 +72,14 @@ checkButton.addEventListener("click", async function () {
             })
         });
 
+
         const data = await response.json();
+
 
         if (!response.ok) {
             throw new Error(data.error || "Something went wrong.");
         }
+
 
         const risk = data.risk;
 
@@ -112,8 +138,14 @@ checkButton.addEventListener("click", async function () {
 
 clearButton.addEventListener("click", function () {
 
-    // Clear message
+    // Clear Message
     messageBox.value = "";
+
+    // Clear Email fields
+    senderEmail.value = "";
+    emailSubject.value = "";
+    emailBody.value = "";
+    emailLink.value = "";
 
     // Hide result
     resultBox.style.display = "none";
@@ -128,15 +160,57 @@ clearButton.addEventListener("click", function () {
 
 
 /* =========================
+   MESSAGE OPTION
+========================= */
+
+messageOption.addEventListener("click", function () {
+
+    // Select Message
+    messageOption.classList.add("active");
+
+    // Remove Email selection
+    emailOption.classList.remove("active");
+
+
+    // Show Message scanner
+    messageScanner.style.display = "block";
+
+    // Hide Email scanner
+    emailScanner.style.display = "none";
+
+
+    // Change button
+    checkButton.textContent = "🔍 Check Message";
+
+
+    // Reset placeholder
+    messageBox.placeholder =
+        "Paste a suspicious message here…";
+
+});
+
+
+/* =========================
    EMAIL OPTION
 ========================= */
 
 emailOption.addEventListener("click", function () {
 
-    // Remove selected state from Message
-    messageOption.classList.remove("active");
-
     // Select Email
     emailOption.classList.add("active");
+
+    // Remove Message selection
+    messageOption.classList.remove("active");
+
+
+    // Hide Message scanner
+    messageScanner.style.display = "none";
+
+    // Show Email scanner
+    emailScanner.style.display = "block";
+
+
+    // Change button
+    checkButton.textContent = "📧 Check Email";
 
 });

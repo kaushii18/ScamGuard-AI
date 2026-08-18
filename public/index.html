@@ -16,24 +16,78 @@
         <div class="logo">🛡️</div>
 
         <h1>ScamGuard AI</h1>
+
         <div class="scan-options">
-    <button id="messageOption">💬 Message</button>
-    <button id="emailOption">📧 Email</button>
-</div>
+            <button id="messageOption">💬 Message</button>
+            <button id="emailOption">📧 Email</button>
+        </div>
 
         <p class="subtitle">
             Protect yourself from online scams with AI-powered detection.
         </p>
 
-        <textarea
-            placeholder="Paste a suspicious message here..."
-        ></textarea>
 
+        <!-- =========================
+             MESSAGE SCANNER
+        ========================== -->
+
+        <div id="messageScanner">
+
+            <textarea
+                id="messageBox"
+                placeholder="Paste a suspicious message here..."
+            ></textarea>
+
+        </div>
+
+
+        <!-- =========================
+             EMAIL SCANNER
+        ========================== -->
+
+        <div id="emailScanner" style="display: none;">
+
+            <input
+                type="email"
+                id="senderEmail"
+                placeholder="📧 Sender email address"
+            >
+
+            <input
+                type="text"
+                id="emailSubject"
+                placeholder="📝 Email subject"
+            >
+
+            <textarea
+                id="emailBody"
+                placeholder="📄 Paste the email content here..."
+            ></textarea>
+
+            <input
+                type="url"
+                id="emailLink"
+                placeholder="🔗 Optional suspicious link"
+            >
+
+        </div>
+
+
+        <!-- =========================
+             ACTION BUTTONS
+        ========================== -->
 
         <button id="checkButton">🔍 Check Message</button>
-<button id="clearButton">🗑️ Clear</button>
+
+        <button id="clearButton">🗑️ Clear</button>
+
+
+        <!-- =========================
+             RESULT
+        ========================== -->
 
         <div class="result">
+
             <h2>⚠️ Risk Analysis</h2>
 
             <div class="risk-bar">
@@ -41,9 +95,11 @@
             </div>
 
             <p class="analysis"></p>
+
         </div>
 
     </div>
+
 
     <script src="script.js"></script>
 
