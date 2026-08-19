@@ -1,145 +1,750 @@
-  * {
+/* =========================
+   GLOBAL RESET
+========================= */
+
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+
+/* =========================
+   BODY
+========================= */
+
 body {
     min-height: 100vh;
+
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #07111f, #102a43, #0b4f6c);
+
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(0, 198, 255, 0.15),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at bottom right,
+            rgba(0, 114, 255, 0.15),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #07111f,
+            #102a43,
+            #0b4f6c
+        );
+
     color: white;
+
     display: flex;
     justify-content: center;
     align-items: center;
+
+    padding: 30px 15px;
 }
 
+
+/* =========================
+   MAIN CONTAINER
+========================= */
+
 .container {
-    width: 90%;
-    max-width: 800px;
+    width: 100%;
+    max-width: 850px;
+
     padding: 40px;
+
     background: rgba(255, 255, 255, 0.08);
+
     border: 1px solid rgba(255, 255, 255, 0.15);
+
     border-radius: 24px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(12px);
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.4),
+        inset 0 1px 1px rgba(255, 255, 255, 0.08);
+
+    backdrop-filter: blur(15px);
+
     text-align: center;
 }
 
+
+/* =========================
+   LOGO
+========================= */
+
 .logo {
     font-size: 50px;
+
     margin-bottom: 10px;
+
+    filter:
+        drop-shadow(
+            0 5px 15px rgba(0, 198, 255, 0.35)
+        );
 }
+
+
+/* =========================
+   TITLE
+========================= */
 
 h1 {
     font-size: 42px;
+
     margin-bottom: 10px;
+
+    letter-spacing: -1px;
 }
+
+
+/* =========================
+   SUBTITLE
+========================= */
 
 .subtitle {
     color: #c8d6e5;
+
     font-size: 18px;
+
     margin-bottom: 30px;
+
+    line-height: 1.5;
 }
 
-textarea {
-    width: 100%;
-    height: 180px;
-    padding: 18px;
-    border: none;
-    border-radius: 15px;
-    resize: none;
-    outline: none;
+
+/* =========================
+   MESSAGE / EMAIL OPTIONS
+========================= */
+
+.scan-options {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    margin: 20px 0 25px;
+}
+
+
+.scan-options button {
+
+    padding: 12px 25px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.2);
+
+    color: white;
+
     font-size: 16px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+
+.scan-options button:hover {
+
+    transform: translateY(-2px);
+
+    background:
+        rgba(255, 255, 255, 0.16);
+
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Active button */
+
+.scan-options button.active {
+
+    background:
+        linear-gradient(
+            135deg,
+            #00c6ff,
+            #0072ff
+        );
+
+    border-color: transparent;
+
+    box-shadow:
+        0 8px 25px rgba(0, 114, 255, 0.35);
+}
+
+
+/* =========================
+   MESSAGE SCANNER
+========================= */
+
+#messageScanner {
+    margin-top: 10px;
+}
+
+
+#messageBox {
+
+    width: 100%;
+
+    height: 180px;
+
+    padding: 18px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.16);
+
+    border-radius: 15px;
+
+    resize: vertical;
+
+    outline: none;
+
+    font-size: 16px;
+
+    font-family: Arial, sans-serif;
+
     background: rgba(255, 255, 255, 0.95);
+
     color: #111;
+
+    margin-bottom: 20px;
+
+    transition: all 0.25s ease;
+}
+
+
+#messageBox:focus {
+
+    border-color: #00c6ff;
+
+    box-shadow:
+        0 0 0 3px rgba(0, 198, 255, 0.15);
+}
+
+
+/* =========================
+   EMAIL SCANNER CONTAINER
+========================= */
+
+#emailScanner {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 0;
+
+    margin-top: 10px;
+
+    margin-bottom: 20px;
+
+    padding: 24px;
+
+    text-align: left;
+
+    background:
+        rgba(255, 255, 255, 0.055);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.13);
+
+    border-radius: 18px;
+
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+
+/* =========================
+   EMAIL HEADER
+========================= */
+
+.email-header {
+
+    text-align: left;
+
+    margin-bottom: 25px;
+
+    padding-bottom: 18px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+.email-header h2 {
+
+    font-size: 23px;
+
+    margin-bottom: 7px;
+
+    color: white;
+}
+
+
+.email-header p {
+
+    color: #aebfd0;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================
+   FORM GROUP
+========================= */
+
+.form-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    text-align: left;
+
     margin-bottom: 20px;
 }
 
-button {
-    padding: 14px 30px;
-    border: none;
-    border-radius: 12px;
-    background: linear-gradient(90deg, #00c6ff, #0072ff);
-    color: white;
-    font-size: 17px;
+
+/* =========================
+   FORM LABEL
+========================= */
+
+.form-group label {
+
+    font-size: 15px;
+
     font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
+
+    color: #ffffff;
+
+    margin-bottom: 5px;
 }
 
-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(0, 114, 255, 0.4);
+
+/* Required star */
+
+.form-group label span {
+
+    color: #ff6b6b;
+
+    margin-left: 3px;
+
+    font-weight: bold;
 }
+
+
+/* Optional text */
+
+.form-group label em {
+
+    font-size: 12px;
+
+    font-style: normal;
+
+    font-weight: normal;
+
+    color: #91a4b8;
+
+    margin-left: 5px;
+}
+
+
+/* =========================
+   FORM DESCRIPTION
+========================= */
+
+.form-group small {
+
+    color: #91a4b8;
+
+    font-size: 12px;
+
+    margin-bottom: 9px;
+
+    line-height: 1.4;
+}
+
+
+/* =========================
+   EMAIL INPUTS
+========================= */
+
+.form-group input,
+.form-group textarea {
+
+    width: 100%;
+
+    padding: 14px 15px;
+
+    border-radius: 11px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.18);
+
+    background:
+        rgba(255, 255, 255, 0.96);
+
+    color: #111827;
+
+    font-size: 15px;
+
+    font-family: Arial, sans-serif;
+
+    outline: none;
+
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s ease;
+}
+
+
+/* Normal input height */
+
+.form-group input {
+
+    height: 50px;
+}
+
+
+/* Email body */
+
+.form-group textarea {
+
+    min-height: 180px;
+
+    resize: vertical;
+
+    line-height: 1.55;
+}
+
+
+/* =========================
+   PLACEHOLDER
+========================= */
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+
+    color: #718096;
+}
+
+
+/* =========================
+   INPUT HOVER
+========================= */
+
+.form-group input:hover,
+.form-group textarea:hover {
+
+    border-color:
+        rgba(0, 198, 255, 0.45);
+}
+
+
+/* =========================
+   INPUT FOCUS
+========================= */
+
+.form-group input:focus,
+.form-group textarea:focus {
+
+    border-color: #00c6ff;
+
+    box-shadow:
+        0 0 0 3px rgba(0, 198, 255, 0.15),
+        0 5px 18px rgba(0, 0, 0, 0.12);
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================
+   MAIN CHECK BUTTON
+========================= */
+
+#checkButton {
+
+    padding: 14px 30px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #00c6ff,
+            #0072ff
+        );
+
+    color: white;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: all 0.3s ease;
+}
+
+
+#checkButton:hover {
+
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 10px 25px rgba(0, 114, 255, 0.4);
+}
+
+
+#checkButton:disabled {
+
+    opacity: 0.65;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+/* =========================
+   CLEAR BUTTON
+========================= */
+
+#clearButton {
+
+    margin-left: 10px;
+
+    padding: 14px 25px;
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.18);
+
+    color: white;
+}
+
+
+#clearButton:hover {
+
+    background:
+        rgba(255, 255, 255, 0.20);
+
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+
+/* =========================
+   RESULT CARD
+========================= */
 
 .result {
-    margin-top: 25px;
-    padding: 20px;
-    border-radius: 15px;
-    background: rgba(255, 255, 255, 0.08);
+
+    margin-top: 28px;
+
+    padding: 25px;
+
+    border-radius: 18px;
+
+    background:
+        rgba(255, 255, 255, 0.07);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.12);
+
     display: none;
+
+    text-align: left;
 }
 
+
+.result h2 {
+
+    text-align: center;
+
+    margin-bottom: 10px;
+
+    font-size: 22px;
+}
+
+
+/* =========================
+   RISK BAR
+========================= */
+
 .risk-bar {
+
     width: 100%;
+
     height: 12px;
+
     margin-top: 15px;
+
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.15);
+
+    background:
+        rgba(255, 255, 255, 0.15);
+
     overflow: hidden;
 }
 
+
 .risk-level {
+
     width: 0%;
+
     height: 100%;
+
     border-radius: 20px;
-    background: linear-gradient(90deg, #00ff88, #ffd000, #ff3b3b);
-    transition: width 1s ease;
+
+    background:
+        linear-gradient(
+            90deg,
+            #00ff88,
+            #ffd000,
+            #ff3b3b
+        );
+
+    transition:
+        width 1s ease;
 }
 
+
+/* =========================
+   AI EXPLANATION
+========================= */
+
+.analysis {
+
+    margin-top: 18px;
+
+    color: #dbeafe;
+
+    font-size: 16px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================
+   MOBILE RESPONSIVE
+========================= */
+
 @media (max-width: 600px) {
-    .container {
-        padding: 25px;
+
+    body {
+
+        padding: 15px;
+
+        align-items: flex-start;
     }
 
+
+    .container {
+
+        padding: 25px 18px;
+
+        margin-top: 20px;
+
+        border-radius: 20px;
+    }
+
+
     h1 {
+
         font-size: 32px;
     }
 
+
     .logo {
+
         font-size: 40px;
     }
-}
-
-#clearButton {
-    margin-left: 10px;
-    background: #555;
-}
-
-#clearButton:hover {
-    background: #333;
-}
-#clearButton:hover {
-    background: #333;
-}
 
 
-/* Message / Email Options */
+    .subtitle {
 
-.scan-options {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 20px 0;
-}
+        font-size: 15px;
+    }
 
-.scan-options button {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 12px 25px;
-}
 
-.scan-options button:hover {
-    background: rgba(255, 255, 255, 0.2);
+    .scan-options {
+
+        gap: 8px;
+    }
+
+
+    .scan-options button {
+
+        padding: 10px 16px;
+
+        font-size: 14px;
+    }
+
+
+    #emailScanner {
+
+        padding: 17px;
+    }
+
+
+    .email-header h2 {
+
+        font-size: 20px;
+    }
+
+
+    .email-header p {
+
+        font-size: 13px;
+    }
+
+
+    .form-group {
+
+        margin-bottom: 16px;
+    }
+
+
+    .form-group input {
+
+        height: 47px;
+    }
+
+
+    .form-group textarea {
+
+        min-height: 150px;
+    }
+
+
+    #checkButton,
+    #clearButton {
+
+        width: 100%;
+
+        margin: 5px 0;
+    }
+
 }

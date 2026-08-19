@@ -1,30 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>ScamGuard AI</title>
 
     <link rel="stylesheet" href="style.css">
+
 </head>
+
 
 <body>
 
     <div class="container">
 
+
+        <!-- =========================
+             LOGO & TITLE
+        ========================== -->
+
         <div class="logo">🛡️</div>
 
         <h1>ScamGuard AI</h1>
 
-        <div class="scan-options">
-            <button id="messageOption">💬 Message</button>
-            <button id="emailOption">📧 Email</button>
-        </div>
-
         <p class="subtitle">
             Protect yourself from online scams with AI-powered detection.
         </p>
+
+
+        <!-- =========================
+             MESSAGE / EMAIL OPTIONS
+        ========================== -->
+
+        <div class="scan-options">
+
+            <button id="messageOption">
+                💬 Message
+            </button>
+
+            <button id="emailOption">
+                📧 Email
+            </button>
+
+        </div>
 
 
         <!-- =========================
@@ -47,28 +69,125 @@
 
         <div id="emailScanner" style="display: none;">
 
-            <input
-                type="email"
-                id="senderEmail"
-                placeholder="📧 Sender email address"
-            >
 
-            <input
-                type="text"
-                id="emailSubject"
-                placeholder="📝 Email subject"
-            >
+            <!-- Email Header -->
 
-            <textarea
-                id="emailBody"
-                placeholder="📄 Paste the email content here..."
-            ></textarea>
+            <div class="email-header">
 
-            <input
-                type="url"
-                id="emailLink"
-                placeholder="🔗 Optional suspicious link"
-            >
+                <h2>📧 Email Verification</h2>
+
+                <p>
+                    Analyze a suspicious email for potential scam or phishing activity.
+                </p>
+
+            </div>
+
+
+            <!-- =========================
+                 SENDER EMAIL
+            ========================== -->
+
+            <div class="form-group">
+
+                <label for="senderEmail">
+
+                    📧 Sender Email Address
+
+                    <span>*</span>
+
+                </label>
+
+                <small>
+                    Enter the email address that sent the message.
+                </small>
+
+                <input
+                    type="email"
+                    id="senderEmail"
+                    placeholder="example@domain.com"
+                >
+
+            </div>
+
+
+            <!-- =========================
+                 EMAIL SUBJECT
+            ========================== -->
+
+            <div class="form-group">
+
+                <label for="emailSubject">
+
+                    📝 Email Subject
+
+                    <span>*</span>
+
+                </label>
+
+                <small>
+                    Enter the subject line of the suspicious email.
+                </small>
+
+                <input
+                    type="text"
+                    id="emailSubject"
+                    placeholder="Enter email subject"
+                >
+
+            </div>
+
+
+            <!-- =========================
+                 EMAIL CONTENT
+            ========================== -->
+
+            <div class="form-group">
+
+                <label for="emailBody">
+
+                    📄 Email Content
+
+                    <span>*</span>
+
+                </label>
+
+                <small>
+                    Paste the complete email message here.
+                </small>
+
+                <textarea
+                    id="emailBody"
+                    placeholder="Paste the email content here..."
+                ></textarea>
+
+            </div>
+
+
+            <!-- =========================
+                 SUSPICIOUS LINK
+            ========================== -->
+
+            <div class="form-group">
+
+                <label for="emailLink">
+
+                    🔗 Suspicious Link
+
+                    <em>(Optional)</em>
+
+                </label>
+
+                <small>
+                    Add any suspicious link included in the email.
+                </small>
+
+                <input
+                    type="url"
+                    id="emailLink"
+                    placeholder="https://example.com"
+                >
+
+            </div>
 
         </div>
 
@@ -77,9 +196,13 @@
              ACTION BUTTONS
         ========================== -->
 
-        <button id="checkButton">🔍 Check Message</button>
+        <button id="checkButton">
+            🔍 Check Message
+        </button>
 
-        <button id="clearButton">🗑️ Clear</button>
+        <button id="clearButton">
+            🗑️ Clear
+        </button>
 
 
         <!-- =========================
@@ -91,17 +214,25 @@
             <h2>⚠️ Risk Analysis</h2>
 
             <div class="risk-bar">
+
                 <div class="risk-level"></div>
+
             </div>
 
             <p class="analysis"></p>
 
         </div>
 
+
     </div>
 
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
 
     <script src="script.js"></script>
 
 </body>
+
 </html>

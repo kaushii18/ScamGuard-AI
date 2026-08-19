@@ -1,8 +1,12 @@
+// =========================
+// ELEMENTS
+// =========================
+
 const messageBox = document.querySelector("#messageBox");
-const emailBody = document.querySelector("#emailBody");
 
 const senderEmail = document.querySelector("#senderEmail");
 const emailSubject = document.querySelector("#emailSubject");
+const emailBody = document.querySelector("#emailBody");
 const emailLink = document.querySelector("#emailLink");
 
 const messageScanner = document.querySelector("#messageScanner");
@@ -15,202 +19,486 @@ const resultBox = document.querySelector(".result");
 const riskLevel = document.querySelector(".risk-level");
 const analysis = document.querySelector(".analysis");
 
-
-// Message / Email options
 const messageOption = document.querySelector("#messageOption");
 const emailOption = document.querySelector("#emailOption");
 
 
-// Message is selected by default
+// =========================
+// DEFAULT: MESSAGE
+// =========================
+
 messageOption.classList.add("active");
-emailScanner.style.display = "none";
+emailOption.classList.remove("active");
+
 messageScanner.style.display = "block";
+emailScanner.style.display = "none";
+
+checkButton.textContent = "🔍 Check Message";
 
 
-/* =========================
-   CHECK BUTTON
-========================= */
+// =========================
+// MESSAGE OPTION
+// =========================
+
+messageOption.addEventListener("click", function () {
+
+    console.log("💬 Message button clicked");
+
+    messageOption.classList.add("active");
+    emailOption.classList.remove("active");
+
+    messageScanner.style.display = "block";
+    emailScanner.style.display = "none";
+
+    checkButton.textContent = "🔍 Check Message";
+
+    resultBox.style.display = "none";
+
+});
+
+
+// =========================
+// EMAIL OPTION
+// =========================
+
+emailOption.addEventListener("click", function () {
+
+    console.log("📧 Email button clicked");
+
+    emailOption.classList.add("active");
+    messageOption.classList.remove("active");
+
+    messageScanner.style.display = "none";
+    emailScanner.style.display = "block";
+
+    checkButton.textContent = "📧 Check Email";
+
+    resultBox.style.display = "none";
+
+});
+
+
+// =========================
+// CHECK BUTTON
+// =========================
 
 checkButton.addEventListener("click", async function () {
 
-    // For now, only Message scanner uses AI
-    // Email AI verification will be added in Step 5B+
+
+    // ==================================================
+    // EMAIL SCANNER
+    // ==================================================
 
     if (emailOption.classList.contains("active")) {
 
-        alert("📧 Email scanner UI is ready! Email verification will be connected next.");
+        const sender = senderEmail.value.trim();
+        const subject = emailSubject.value.trim();
+        const body = emailBody.value.trim();
+        const link = emailLink.value.trim();
+
+
+        // -------------------------
+        // VALIDATE EMAIL INPUT
+        // -------------------------
+
+        if (!sender || !subject || !body) {
+
+            alert(
+                "Please enter sender email, subject and email content."
+            );
+
+            return;
+        }
+
+
+        // -------------------------
+        // LOADING
+        // -------------------------
+
+        checkButton.disabled = true;
+
+        checkButton.textContent =
+            "📧 Checking Email...";
+
+        resultBox.style.display = "block";
+
+        analysis.textContent =
+            "AI is analyzing the email...";
+
+
+        try {
+
+            // -------------------------
+            // SEND EMAIL TO SERVER
+            // -------------------------
+
+            const response = await fetch(
+                "/check-email",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        sender: sender,
+
+                        subject: subject,
+
+                        body: body,
+
+                        link: link
+
+                    })
+
+                }
+            );
+
+
+            // -------------------------
+            // GET SERVER RESPONSE
+            // -------------------------
+
+            const data =
+                await response.json();
+
+
+            // -------------------------
+            // CHECK SERVER ERROR
+            // -------------------------
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "Email analysis failed."
+                );
+
+            }
+
+
+            // -------------------------
+            // GET RISK
+            // -------------------------
+
+            const risk =
+                Number(data.risk);
+
+
+            // -------------------------
+            // UPDATE RISK BAR
+            // -------------------------
+
+            riskLevel.style.width =
+                risk + "%";
+
+
+            // -------------------------
+            // RISK MESSAGE
+            // -------------------------
+
+            if (risk >= 70) {
+
+                resultBox.querySelector("h2").textContent =
+                    "🚨 High Scam Risk: " +
+                    risk +
+                    "%";
+
+            }
+
+            else if (risk >= 30) {
+
+                resultBox.querySelector("h2").textContent =
+                    "⚠️ Possible Scam: " +
+                    risk +
+                    "%";
+
+            }
+
+            else {
+
+                resultBox.querySelector("h2").textContent =
+                    "✅ Low Scam Risk: " +
+                    risk +
+                    "%";
+
+            }
+
+
+            // -------------------------
+            // AI EXPLANATION
+            // -------------------------
+
+            analysis.textContent =
+                data.explanation;
+
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "❌ Email Analysis Error:",
+                error
+            );
+
+
+            resultBox.querySelector("h2").textContent =
+                "❌ Email Analysis Error";
+
+
+            analysis.textContent =
+                "Unable to analyze the email. Please check your server and API key.";
+
+        }
+
+
+        // -------------------------
+        // RESET BUTTON
+        // -------------------------
+
+        checkButton.disabled = false;
+
+        checkButton.textContent =
+            "📧 Check Email";
+
 
         return;
     }
 
 
-    const message = messageBox.value.trim();
+    // ==================================================
+    // MESSAGE SCANNER
+    // ==================================================
 
-    if (message === "") {
-        alert("Please paste a message first.");
+    const message =
+        messageBox.value.trim();
+
+
+    // -------------------------
+    // VALIDATE MESSAGE
+    // -------------------------
+
+    if (!message) {
+
+        alert(
+            "Please paste a message first."
+        );
+
         return;
     }
+
+
+    // -------------------------
+    // LOADING
+    // -------------------------
 
     checkButton.disabled = true;
-    checkButton.textContent = "🔍 Checking...";
 
-    resultBox.style.display = "block";
-    analysis.textContent = "AI is analyzing the message...";
+    checkButton.textContent =
+        "🔍 Checking...";
+
+    resultBox.style.display =
+        "block";
+
+    analysis.textContent =
+        "AI is analyzing the message...";
 
 
     try {
 
-        const response = await fetch("/check-message", {
-            method: "POST",
+        // -------------------------
+        // SEND MESSAGE TO SERVER
+        // -------------------------
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+        const response = await fetch(
+            "/check-message",
+            {
 
-            body: JSON.stringify({
-                message: message
-            })
-        });
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    message: message
+
+                })
+
+            }
+        );
 
 
-        const data = await response.json();
+        // -------------------------
+        // GET RESPONSE
+        // -------------------------
 
+        const data =
+            await response.json();
+
+
+        // -------------------------
+        // CHECK ERROR
+        // -------------------------
 
         if (!response.ok) {
-            throw new Error(data.error || "Something went wrong.");
+
+            throw new Error(
+                data.error ||
+                "Message analysis failed."
+            );
+
         }
 
 
-        const risk = data.risk;
+        // -------------------------
+        // GET RISK
+        // -------------------------
 
-        riskLevel.style.width = risk + "%";
+        const risk =
+            Number(data.risk);
 
 
-        /* =========================
-           RISK LEVEL
-        ========================= */
+        // -------------------------
+        // UPDATE RISK BAR
+        // -------------------------
+
+        riskLevel.style.width =
+            risk + "%";
+
+
+        // -------------------------
+        // RISK MESSAGE
+        // -------------------------
 
         if (risk >= 70) {
 
             resultBox.querySelector("h2").textContent =
-                "🚨 High Scam Risk: " + risk + "%";
+                "🚨 High Scam Risk: " +
+                risk +
+                "%";
 
-        } else if (risk >= 30) {
+        }
+
+        else if (risk >= 30) {
 
             resultBox.querySelector("h2").textContent =
-                "⚠️ Possible Scam: " + risk + "%";
+                "⚠️ Possible Scam: " +
+                risk +
+                "%";
 
-        } else {
+        }
+
+        else {
 
             resultBox.querySelector("h2").textContent =
-                "✅ Low Scam Risk: " + risk + "%";
+                "✅ Low Scam Risk: " +
+                risk +
+                "%";
+
         }
 
 
-        /* =========================
-           AI EXPLANATION
-        ========================= */
+        // -------------------------
+        // AI EXPLANATION
+        // -------------------------
 
-        analysis.textContent = data.explanation;
+        analysis.textContent =
+            data.explanation;
 
 
-    } catch (error) {
+    }
 
-        console.error(error);
+    catch (error) {
+
+        console.error(
+            "❌ Message Analysis Error:",
+            error
+        );
+
 
         resultBox.querySelector("h2").textContent =
-            "❌ Error";
+            "❌ Message Analysis Error";
+
 
         analysis.textContent =
             "Unable to analyze the message. Please check your server and API key.";
+
     }
 
 
+    // -------------------------
+    // RESET BUTTON
+    // -------------------------
+
     checkButton.disabled = false;
-    checkButton.textContent = "🔍 Check Message";
+
+    checkButton.textContent =
+        "🔍 Check Message";
 
 });
 
 
-/* =========================
-   CLEAR BUTTON
-========================= */
+// ==================================================
+// CLEAR BUTTON
+// ==================================================
 
 clearButton.addEventListener("click", function () {
 
-    // Clear Message
+    // -------------------------
+    // CLEAR MESSAGE
+    // -------------------------
+
     messageBox.value = "";
 
-    // Clear Email fields
+
+    // -------------------------
+    // CLEAR EMAIL
+    // -------------------------
+
     senderEmail.value = "";
+
     emailSubject.value = "";
+
     emailBody.value = "";
+
     emailLink.value = "";
 
-    // Hide result
-    resultBox.style.display = "none";
 
-    // Reset risk bar
-    riskLevel.style.width = "0%";
+    // -------------------------
+    // HIDE RESULT
+    // -------------------------
 
-    // Clear explanation
-    analysis.textContent = "";
-
-});
+    resultBox.style.display =
+        "none";
 
 
-/* =========================
-   MESSAGE OPTION
-========================= */
+    // -------------------------
+    // RESET RISK BAR
+    // -------------------------
 
-messageOption.addEventListener("click", function () {
-
-    // Select Message
-    messageOption.classList.add("active");
-
-    // Remove Email selection
-    emailOption.classList.remove("active");
+    riskLevel.style.width =
+        "0%";
 
 
-    // Show Message scanner
-    messageScanner.style.display = "block";
+    // -------------------------
+    // CLEAR EXPLANATION
+    // -------------------------
 
-    // Hide Email scanner
-    emailScanner.style.display = "none";
-
-
-    // Change button
-    checkButton.textContent = "🔍 Check Message";
+    analysis.textContent =
+        "";
 
 
-    // Reset placeholder
-    messageBox.placeholder =
-        "Paste a suspicious message here…";
+    // -------------------------
+    // RESET RESULT TITLE
+    // -------------------------
 
-});
-
-
-/* =========================
-   EMAIL OPTION
-========================= */
-
-emailOption.addEventListener("click", function () {
-
-    // Select Email
-    emailOption.classList.add("active");
-
-    // Remove Message selection
-    messageOption.classList.remove("active");
-
-
-    // Hide Message scanner
-    messageScanner.style.display = "none";
-
-    // Show Email scanner
-    emailScanner.style.display = "block";
-
-
-    // Change button
-    checkButton.textContent = "📧 Check Email";
+    resultBox.querySelector("h2").textContent =
+        "⚠️ Risk Analysis";
 
 });
