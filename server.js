@@ -101,6 +101,69 @@ words such as "OTP", "bank", or "verify". Consider the complete context.
     }
 });
 
+app.post("/check-email", async (req, res) => {
+    try {
+        const { sender, subject, body, link } = req.body;
+
+        if (!sender || !subject || !body) {
+            return res.status(400).json({
+                error: "Sender, subject and email body are required."
+            });
+        }
+
+        const completion = await client.chat.completions.create({
+            model: "deepseek-chat",
+            messages: [
+                {
+                    role: "system",
+                    content: `You are ScamGuard AI, an AI assistant that detects scam emails.
+
+Analyze the email and return ONLY valid JSON in this format:
+{
+  "risk": 0,
+  "explanation": "short explanation"
+}
+
+The risk must be a number from 0 to 100. Use 0-29 for low risk, 30-69 for suspicious, and 70-100 for high scam risk. Consider urgency, impersonation, requests for credentials or money, suspicious links, threats, and unusual sender details.`
+                },
+                {
+                    role: "user",
+                    content: `Sender: ${sender}\nSubject: ${subject}\nEmail body: ${body}\nLink: ${link || "None provided"}`
+                }
+            ]
+        });
+
+        const result = completion.choices?.[0]?.message?.content;
+        if (!result) {
+            throw new Error("DeepSeek returned an empty response.");
+        }
+
+        const data = JSON.parse(
+            result.replace(/```json/gi, "").replace(/```/g, "").trim()
+        );
+
+        const risk = Number(data.risk);
+        if (!Number.isFinite(risk)) {
+            throw new Error("DeepSeek returned an invalid risk value.");
+        }
+
+        res.json({
+            risk: Math.max(0, Math.min(100, risk)),
+            explanation: data.explanation || "No explanation received."
+        });
+    } catch (error) {
+        console.error("DeepSeek Email Error:", error);
+
+        const message = error?.status === 401
+            ? "DeepSeek rejected the API key. Check DEEPSEEK_API_KEY in .env."
+            : error?.status === 429
+                ? "DeepSeek rate limit or balance limit reached."
+                : "DeepSeek email analysis failed. Check the server log for details.";
+
+        res.status(500).json({ error: message });
+    }
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(
