@@ -47,8 +47,11 @@ const emailSubject = document.querySelector("#emailSubject");
 const emailBody = document.querySelector("#emailBody");
 const emailLink = document.querySelector("#emailLink");
 
+const urlInput = document.querySelector("#urlInput");
+
 const messageScanner = document.querySelector("#messageScanner");
 const emailScanner = document.querySelector("#emailScanner");
+const urlScanner = document.querySelector("#urlScanner");
 
 const checkButton = document.querySelector("#checkButton");
 const clearButton = document.querySelector("#clearButton");
@@ -59,6 +62,7 @@ const analysis = document.querySelector(".analysis");
 
 const messageOption = document.querySelector("#messageOption");
 const emailOption = document.querySelector("#emailOption");
+const urlOption = document.querySelector("#urlOption");
 
 
 // ==================================================
@@ -67,9 +71,11 @@ const emailOption = document.querySelector("#emailOption");
 
 messageOption.classList.add("active");
 emailOption.classList.remove("active");
+urlOption.classList.remove("active");
 
 messageScanner.style.display = "block";
 emailScanner.style.display = "none";
+urlScanner.style.display = "none";
 
 checkButton.textContent = "🔍 Check Message";
 
@@ -84,9 +90,11 @@ messageOption.addEventListener("click", function () {
 
     messageOption.classList.add("active");
     emailOption.classList.remove("active");
+    urlOption.classList.remove("active");
 
     messageScanner.style.display = "block";
     emailScanner.style.display = "none";
+    urlScanner.style.display = "none";
 
     checkButton.textContent = "🔍 Check Message";
 
@@ -103,13 +111,38 @@ emailOption.addEventListener("click", function () {
 
     console.log("📧 Email button clicked");
 
-    emailOption.classList.add("active");
     messageOption.classList.remove("active");
+    emailOption.classList.add("active");
+    urlOption.classList.remove("active");
 
     messageScanner.style.display = "none";
     emailScanner.style.display = "block";
+    urlScanner.style.display = "none";
 
     checkButton.textContent = "📧 Check Email";
+
+    resultBox.style.display = "none";
+
+});
+
+
+// ==================================================
+// URL / LINK OPTION
+// ==================================================
+
+urlOption.addEventListener("click", function () {
+
+    console.log("🔗 URL / Link button clicked");
+
+    messageOption.classList.remove("active");
+    emailOption.classList.remove("active");
+    urlOption.classList.add("active");
+
+    messageScanner.style.display = "none";
+    emailScanner.style.display = "none";
+    urlScanner.style.display = "block";
+
+    checkButton.textContent = "🔗 Check URL";
 
     resultBox.style.display = "none";
 
@@ -122,6 +155,173 @@ emailOption.addEventListener("click", function () {
 
 checkButton.addEventListener("click", async function () {
 
+
+    // ==================================================
+    // URL SCANNER
+    // ==================================================
+
+    if (urlOption.classList.contains("active")) {
+
+        const url = urlInput.value.trim();
+
+        // Validate
+        if (!url) {
+
+            alert("Please enter a URL first.");
+
+            return;
+        }
+
+        // Basic URL format validation
+        try {
+
+            new URL(url);
+
+        }
+
+        catch {
+
+            alert(
+                "Please enter a valid URL.\nExample: https://example.com"
+            );
+
+            return;
+        }
+
+
+        // Loading
+        checkButton.disabled = true;
+
+        checkButton.textContent =
+            "🔗 Checking URL...";
+
+        resultBox.style.display = "block";
+
+        analysis.textContent =
+            "Analyzing the URL and collecting real-time security information...";
+
+
+        try {
+
+            // ==================================================
+            // BACKEND CONNECTION
+            // ==================================================
+
+            const response = await fetch(
+                "/check-url",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        url: url
+                    })
+
+                }
+            );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "URL analysis failed."
+                );
+
+            }
+
+
+            // ==================================================
+            // DYNAMIC RISK RESULT
+            // ==================================================
+
+            const risk =
+                Number(data.risk);
+
+
+            // Safety check
+            if (Number.isNaN(risk)) {
+
+                throw new Error(
+                    "Invalid risk value returned by server."
+                );
+
+            }
+
+
+            // Risk bar
+            riskLevel.style.width =
+                `${Math.max(0, Math.min(100, risk))}%`;
+
+
+            // Risk message
+            if (risk >= 70) {
+
+                resultBox.querySelector("h2").textContent =
+                    `🚨 High Scam Risk: ${risk}%`;
+
+            }
+
+            else if (risk >= 30) {
+
+                resultBox.querySelector("h2").textContent =
+                    `⚠️ Possible Scam: ${risk}%`;
+
+            }
+
+            else {
+
+                resultBox.querySelector("h2").textContent =
+                    `✅ Low Scam Risk: ${risk}%`;
+
+            }
+
+
+            // AI explanation
+            analysis.textContent =
+                data.explanation ||
+                "No explanation received.";
+
+        }
+
+
+        catch (error) {
+
+            console.error(
+                "❌ URL Analysis Error:",
+                error
+            );
+
+            resultBox.querySelector("h2").textContent =
+                "❌ URL Analysis Error";
+
+            analysis.textContent =
+                "Unable to analyze the URL. Please check your server and API configuration.";
+
+        }
+
+
+        finally {
+
+            checkButton.disabled = false;
+
+            checkButton.textContent =
+                "🔗 Check URL";
+
+        }
+
+        return;
+    }
+
+
     // ==================================================
     // EMAIL SCANNER
     // ==================================================
@@ -133,6 +333,7 @@ checkButton.addEventListener("click", async function () {
         const body = emailBody.value.trim();
         const link = emailLink.value.trim();
 
+
         // Validate
         if (!sender || !subject || !body) {
 
@@ -143,45 +344,60 @@ checkButton.addEventListener("click", async function () {
             return;
         }
 
+
         // Loading
         checkButton.disabled = true;
-        checkButton.textContent = "📧 Checking Email...";
 
-        resultBox.style.display = "block";
+        checkButton.textContent =
+            "📧 Checking Email...";
+
+        resultBox.style.display =
+            "block";
 
         analysis.textContent =
             "AI is analyzing the email...";
 
+
         try {
 
-            const response = await fetch("/check-email", {
+            const response = await fetch(
+                "/check-email",
+                {
 
-                method: "POST",
+                    method: "POST",
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
 
-                body: JSON.stringify({
-                    sender: sender,
-                    subject: subject,
-                    body: body,
-                    link: link
-                })
+                    body: JSON.stringify({
+                        sender: sender,
+                        subject: subject,
+                        body: body,
+                        link: link
+                    })
 
-            });
+                }
+            );
 
-            const data = await response.json();
+
+            const data =
+                await response.json();
+
 
             if (!response.ok) {
 
                 throw new Error(
-                    data.error || "Email analysis failed."
+                    data.error ||
+                    "Email analysis failed."
                 );
 
             }
 
-            const risk = Number(data.risk);
+
+            const risk =
+                Number(data.risk);
+
 
             // Safety check
             if (Number.isNaN(risk)) {
@@ -191,6 +407,7 @@ checkButton.addEventListener("click", async function () {
                 );
 
             }
+
 
             riskLevel.style.width =
                 `${Math.max(0, Math.min(100, risk))}%`;
@@ -221,9 +438,11 @@ checkButton.addEventListener("click", async function () {
 
             // AI explanation
             analysis.textContent =
-                data.explanation || "No explanation received.";
+                data.explanation ||
+                "No explanation received.";
 
         }
+
 
         catch (error) {
 
@@ -240,10 +459,13 @@ checkButton.addEventListener("click", async function () {
 
         }
 
+
         finally {
 
             checkButton.disabled = false;
-            checkButton.textContent = "📧 Check Email";
+
+            checkButton.textContent =
+                "📧 Check Email";
 
         }
 
@@ -257,6 +479,7 @@ checkButton.addEventListener("click", async function () {
 
     const message =
         messageBox.value.trim();
+
 
     // Validate
     if (!message) {
@@ -360,7 +583,8 @@ checkButton.addEventListener("click", async function () {
 
         // AI explanation
         analysis.textContent =
-            data.explanation || "No explanation received.";
+            data.explanation ||
+            "No explanation received.";
 
     }
 
@@ -399,6 +623,7 @@ checkButton.addEventListener("click", async function () {
 
 clearButton.addEventListener("click", function () {
 
+
     // Clear message
     messageBox.value = "";
 
@@ -408,6 +633,10 @@ clearButton.addEventListener("click", function () {
     emailSubject.value = "";
     emailBody.value = "";
     emailLink.value = "";
+
+
+    // Clear URL
+    urlInput.value = "";
 
 
     // Hide result
@@ -429,4 +658,4 @@ clearButton.addEventListener("click", function () {
     resultBox.querySelector("h2").textContent =
         "⚠️ Risk Analysis";
 
-});
+}); 

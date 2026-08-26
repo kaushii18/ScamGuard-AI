@@ -33,7 +33,7 @@
 
 
         <!-- =========================
-             MESSAGE / EMAIL OPTIONS
+             MESSAGE / EMAIL / URL OPTIONS
         ========================== -->
 
         <div class="scan-options">
@@ -44,6 +44,10 @@
 
             <button id="emailOption">
                 📧 Email
+            </button>
+
+            <button id="urlOption">
+                🔗 URL / Link
             </button>
 
         </div>
@@ -184,6 +188,49 @@
                 <input
                     type="url"
                     id="emailLink"
+                    placeholder="https://example.com"
+                >
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =========================
+             URL / LINK SCANNER
+        ========================== -->
+
+        <div id="urlScanner" style="display: none;">
+
+            <div class="email-header">
+
+                <h2>🔗 URL / Link Verification</h2>
+
+                <p>
+                    Analyze a suspicious website link for potential scam or phishing activity.
+                </p>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="urlInput">
+
+                    🔗 Website URL
+
+                    <span>*</span>
+
+                </label>
+
+                <small>
+                    Paste the complete website link you want to verify.
+                </small>
+
+                <input
+                    type="url"
+                    id="urlInput"
                     placeholder="https://example.com"
                 >
 
