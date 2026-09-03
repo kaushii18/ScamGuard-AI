@@ -1,11 +1,10 @@
 /* =========================================================
-   SCAMGUARD AI — ADVANCED HACKER / CYBER SECURITY THEME
+   SCAMGUARD AI — MODERN CYBERSECURITY THEME (ENHANCED)
    FULL CSS — REPLACE YOUR EXISTING style.css
 ========================================================= */
 
-
 /* =========================================================
-   GLOBAL RESET
+   GLOBAL RESET & FONTS
 ========================================================= */
 
 * {
@@ -14,1565 +13,504 @@
     box-sizing: border-box;
 }
 
-
 /* =========================================================
-   ROOT VARIABLES
+   ROOT VARIABLES (COLOR PALETTE & METRICS)
 ========================================================= */
 
 :root {
-    --green: #00ff41;
-    --green-bright: #39ff14;
-    --green-dark: #00a83b;
-    --green-soft: rgba(0, 255, 65, 0.15);
-    --green-glow: rgba(0, 255, 65, 0.55);
+    /* Brand Neon Palette */
+    --cyan: #00f0ff;
+    --cyan-glow: rgba(0, 240, 255, 0.4);
+    --green: #00ff66;
+    --green-dark: #00a843;
+    --green-glow: rgba(0, 255, 102, 0.35);
+    --purple-accent: #7000ff;
 
-    --black: #010503;
-    --dark: #031008;
-    --panel: rgba(2, 15, 8, 0.90);
+    /* Base Surfaces */
+    --bg-dark: #050811;
+    --bg-card: rgba(10, 16, 30, 0.85);
+    --panel-border: rgba(0, 240, 255, 0.2);
+    --input-bg: rgba(15, 23, 42, 0.75);
 
-    --text: #d8ffe5;
-    --muted: #78a98a;
+    /* Typography Colors */
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
 
-    --danger: #ff3158;
-    --warning: #ffd000;
+    /* Alert States */
+    --danger: #ff0055;
+    --warning: #ffb700;
 }
-
 
 /* =========================================================
    ANIMATIONS
 ========================================================= */
 
-/* Moving background */
-
-@keyframes backgroundPulse {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
+@keyframes ambientPulse {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
 }
 
-
-/* Horizontal hacker laser */
-
-@keyframes hackerRay {
-
-    0% {
-        transform: translateX(-120%);
-        opacity: 0;
-    }
-
-    8% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 1;
-    }
-
-    92% {
-        opacity: 1;
-    }
-
-    100% {
-        transform: translateX(220%);
-        opacity: 0;
-    }
+@keyframes laserSweep {
+    0% { transform: translateX(-100%); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateX(200%); opacity: 0; }
 }
 
-
-/* Vertical scanner */
-
-@keyframes verticalScanner {
-
-    0% {
-        top: -5%;
-        opacity: 0;
-    }
-
-    10% {
-        opacity: 0.8;
-    }
-
-    50% {
-        opacity: 1;
-    }
-
-    90% {
-        opacity: 0.8;
-    }
-
-    100% {
-        top: 105%;
-        opacity: 0;
-    }
+@keyframes gridDrift {
+    from { background-position: 0 0, 0 0; }
+    to { background-position: 40px 40px, 40px 40px; }
 }
 
-
-/* Neon breathing */
-
-@keyframes neonBreathing {
-
-    0%,
-    100% {
-        box-shadow:
-            0 0 5px rgba(0, 255, 65, 0.12),
-            0 0 15px rgba(0, 255, 65, 0.06);
-    }
-
-    50% {
-        box-shadow:
-            0 0 12px rgba(0, 255, 65, 0.40),
-            0 0 35px rgba(0, 255, 65, 0.15);
-    }
+@keyframes buttonGlowScan {
+    0% { left: -100%; }
+    100% { left: 200%; }
 }
-
-
-/* Moving cyber grid */
-
-@keyframes gridMove {
-
-    from {
-        background-position:
-            0 0,
-            0 0;
-    }
-
-    to {
-        background-position:
-            60px 60px,
-            60px 60px;
-    }
-}
-
-
-/* Button scanning effect */
-
-@keyframes buttonScan {
-
-    0% {
-        left: -120%;
-    }
-
-    100% {
-        left: 120%;
-    }
-}
-
 
 /* =========================================================
-   BODY
+   BODY BACKGROUND & ATMOSPHERE
 ========================================================= */
 
 body {
-
     min-height: 100vh;
-
-    font-family:
-        "Courier New",
-        Consolas,
-        monospace;
-
-    color:
-        var(--text);
-
-    display:
-        flex;
-
-    justify-content:
-        center;
-
-    align-items:
-        center;
-
-    padding:
-        30px 15px;
-
-    overflow-x:
-        hidden;
-
-    position:
-        relative;
-
-    background:
-
-        radial-gradient(
-            circle at 50% 0%,
-            rgba(0, 255, 65, 0.11),
-            transparent 35%
-        ),
-
-        radial-gradient(
-            circle at 0% 100%,
-            rgba(0, 255, 65, 0.07),
-            transparent 35%
-        ),
-
-        linear-gradient(
-            120deg,
-            #010503,
-            #031008,
-            #010503,
-            #04150a,
-            #010503
-        );
-
-    background-size:
-        300% 300%;
-
-    animation:
-        backgroundPulse 15s ease infinite;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    overflow-x: hidden;
+    position: relative;
+    background: 
+        radial-gradient(circle at 50% 10%, rgba(0, 240, 255, 0.12), transparent 45%),
+        radial-gradient(circle at 85% 90%, rgba(112, 0, 255, 0.1), transparent 40%),
+        linear-gradient(135deg, #03060d, #070d1a, #040712);
+    background-size: 200% 200%;
+    animation: ambientPulse 12s ease infinite;
 }
 
-
-/* =========================================================
-   CYBER GRID
-========================================================= */
-
+/* Moving Cyber Grid */
 body::before {
-
-    content:
-        "";
-
-    position:
-        fixed;
-
-    inset:
-        0;
-
-    pointer-events:
-        none;
-
-    z-index:
-        0;
-
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
     background-image:
-
-        linear-gradient(
-            rgba(0, 255, 65, 0.055) 1px,
-            transparent 1px
-        ),
-
-        linear-gradient(
-            90deg,
-            rgba(0, 255, 65, 0.055) 1px,
-            transparent 1px
-        );
-
-    background-size:
-        60px 60px;
-
-    animation:
-        gridMove 12s linear infinite;
-
-    mask-image:
-        linear-gradient(
-            to bottom,
-            transparent,
-            black 15%,
-            black 85%,
-            transparent
-        );
+        linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridDrift 20s linear infinite;
+    mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 90%);
 }
 
-
-/* =========================================================
-   FULL SCREEN CONTINUOUS GREEN RAY
-========================================================= */
-
+/* Top Screen Cyber Laser */
 body::after {
-
-    content:
-        "";
-
-    position:
-        fixed;
-
-    top:
-        0;
-
-    left:
-        0;
-
-    width:
-        55%;
-
-    height:
-        3px;
-
-    z-index:
-        9999;
-
-    pointer-events:
-        none;
-
-    background:
-
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(0, 255, 65, 0.10),
-            var(--green),
-            #ffffff,
-            var(--green),
-            rgba(0, 255, 65, 0.10),
-            transparent
-        );
-
-    box-shadow:
-
-        0 0 5px var(--green),
-
-        0 0 15px var(--green),
-
-        0 0 35px rgba(0, 255, 65, 0.80),
-
-        0 0 70px rgba(0, 255, 65, 0.35);
-
-    animation:
-        hackerRay 3.5s linear infinite;
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 40%;
+    height: 2px;
+    z-index: 9999;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--cyan), #ffffff, var(--cyan), transparent);
+    box-shadow: 0 0 12px var(--cyan), 0 0 30px var(--cyan-glow);
+    animation: laserSweep 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-
 /* =========================================================
-   MAIN CONTAINER
+   MAIN CONTAINER (GLASS CARD)
 ========================================================= */
 
 .container {
-
-    width:
-        100%;
-
-    max-width:
-        850px;
-
-    padding:
-        40px;
-
-    position:
-        relative;
-
-    z-index:
-        2;
-
-    background:
-
-        linear-gradient(
-            145deg,
-            rgba(3, 20, 10, 0.94),
-            rgba(0, 7, 3, 0.97)
-        );
-
-    border:
-        1px solid rgba(0, 255, 65, 0.25);
-
-    border-radius:
-        16px;
-
-    box-shadow:
-
-        0 0 0 1px rgba(0, 255, 65, 0.03),
-
-        0 30px 80px rgba(0, 0, 0, 0.85),
-
-        inset 0 0 40px rgba(0, 255, 65, 0.025);
-
-    backdrop-filter:
-        blur(18px);
-
-    text-align:
-        center;
-
-    overflow:
-        hidden;
-
-    animation:
-        neonBreathing 5s ease infinite;
+    width: 100%;
+    max-width: 850px;
+    padding: 45px;
+    position: relative;
+    z-index: 2;
+    background: var(--bg-card);
+    border: 1px solid var(--panel-border);
+    border-radius: 20px;
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.7),
+        0 0 40px rgba(0, 240, 255, 0.05),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    text-align: center;
+    overflow: hidden;
 }
 
-
-/* =========================================================
-   CONTAINER TOP MOVING LASER
-========================================================= */
-
+/* Accent Line Top of Container */
 .container::before {
-
-    content:
-        "";
-
-    position:
-        absolute;
-
-    top:
-        0;
-
-    left:
-        -100%;
-
-    width:
-        100%;
-
-    height:
-        2px;
-
-    background:
-
-        linear-gradient(
-            90deg,
-            transparent,
-            var(--green),
-            #ffffff,
-            var(--green),
-            transparent
-        );
-
-    box-shadow:
-        0 0 12px var(--green);
-
-    animation:
-        hackerRay 4s linear infinite;
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), var(--green), transparent);
 }
 
-
 /* =========================================================
-   CONTAINER BOTTOM LINE
-========================================================= */
-
-.container::after {
-
-    content:
-        "";
-
-    position:
-        absolute;
-
-    bottom:
-        0;
-
-    left:
-        0;
-
-    width:
-        100%;
-
-    height:
-        1px;
-
-    background:
-
-        linear-gradient(
-            90deg,
-            transparent,
-            var(--green),
-            transparent
-        );
-
-    box-shadow:
-        0 0 10px rgba(0, 255, 65, 0.5);
-}
-
-
-/* =========================================================
-   LOGO
+   HEADER & TYPOGRAPHY
 ========================================================= */
 
 .logo {
-
-    font-size:
-        52px;
-
-    margin-bottom:
-        12px;
-
-    filter:
-
-        drop-shadow(
-            0 0 8px rgba(0, 255, 65, 0.8)
-        )
-
-        drop-shadow(
-            0 0 25px rgba(0, 255, 65, 0.4)
-        );
-
-    animation:
-        neonBreathing 3s ease infinite;
+    font-size: 48px;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 12px var(--cyan-glow));
+    display: inline-block;
 }
-
-
-/* =========================================================
-   TITLE
-========================================================= */
 
 h1 {
-
-    font-size:
-        42px;
-
-    margin-bottom:
-        10px;
-
-    letter-spacing:
-        2px;
-
-    color:
-        var(--green);
-
-    text-shadow:
-
-        0 0 5px var(--green),
-
-        0 0 15px var(--green),
-
-        0 0 30px rgba(0, 255, 65, 0.4);
+    font-size: 40px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #ffffff 30%, var(--cyan) 70%, var(--green) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
 }
-
-
-/* =========================================================
-   SUBTITLE
-========================================================= */
 
 .subtitle {
-
-    color:
-        var(--muted);
-
-    font-size:
-        14px;
-
-    margin-bottom:
-        30px;
-
-    line-height:
-        1.6;
-
-    letter-spacing:
-        0.5px;
+    color: var(--text-secondary);
+    font-size: 15px;
+    margin-bottom: 35px;
+    line-height: 1.6;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-
 /* =========================================================
-   MESSAGE / EMAIL OPTIONS
+   SCANNER MODE TOGGLE BUTTONS
 ========================================================= */
 
 .scan-options {
-
-    display:
-        flex;
-
-    justify-content:
-        center;
-
-    gap:
-        10px;
-
-    margin:
-        20px 0 25px;
-
-    flex-wrap:
-        wrap;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 0 30px;
+    flex-wrap: wrap;
 }
-
 
 .scan-options button {
-
-    padding:
-        12px 25px;
-
-    border-radius:
-        8px;
-
-    background:
-        rgba(0, 255, 65, 0.025);
-
-    border:
-        1px solid rgba(0, 255, 65, 0.25);
-
-    color:
-        var(--muted);
-
-    font-family:
-        "Courier New",
-        monospace;
-
-    font-size:
-        15px;
-
-    font-weight:
-        bold;
-
-    cursor:
-        pointer;
-
-    transition:
-        all 0.25s ease;
+    padding: 12px 24px;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 
 .scan-options button:hover {
-
-    color:
-        var(--green);
-
-    border-color:
-        var(--green);
-
-    background:
-        rgba(0, 255, 65, 0.08);
-
-    box-shadow:
-        0 0 15px rgba(0, 255, 65, 0.2);
-
-    transform:
-        translateY(-2px);
+    color: #ffffff;
+    border-color: var(--cyan);
+    background: rgba(0, 240, 255, 0.08);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+    transform: translateY(-2px);
 }
-
-
-/* =========================================================
-   ACTIVE BUTTON
-========================================================= */
 
 .scan-options button.active {
-
-    color:
-        #001b07;
-
-    background:
-        var(--green);
-
-    border-color:
-        var(--green);
-
-    box-shadow:
-
-        0 0 10px var(--green),
-
-        0 0 30px rgba(0, 255, 65, 0.3);
+    color: #030712;
+    background: linear-gradient(135deg, var(--cyan), var(--green));
+    border-color: transparent;
+    box-shadow: 0 0 20px var(--cyan-glow);
+    font-weight: 700;
 }
-
 
 /* =========================================================
-   MESSAGE SCANNER
+   INPUT & SCANNER FIELDS
 ========================================================= */
 
-#messageScanner {
-
-    margin-top:
-        10px;
+#messageScanner, #emailScanner {
+    margin-top: 10px;
 }
-
-
-/* =========================================================
-   MESSAGE BOX
-========================================================= */
-
-#messageBox {
-
-    width:
-        100%;
-
-    height:
-        180px;
-
-    padding:
-        18px;
-
-    border:
-        1px solid rgba(0, 255, 65, 0.20);
-
-    border-radius:
-        8px;
-
-    resize:
-        vertical;
-
-    outline:
-        none;
-
-    font-size:
-        15px;
-
-    font-family:
-        "Courier New",
-        monospace;
-
-    background:
-        #eafff0;
-
-    color:
-        #031008;
-
-    margin-bottom:
-        20px;
-
-    transition:
-        all 0.25s ease;
-}
-
-
-#messageBox:focus {
-
-    border-color:
-        var(--green);
-
-    box-shadow:
-
-        0 0 5px var(--green),
-
-        0 0 20px rgba(0, 255, 65, 0.25);
-}
-
-
-/* =========================================================
-   EMAIL SCANNER
-========================================================= */
 
 #emailScanner {
-
-    display:
-        flex;
-
-    flex-direction:
-        column;
-
-    gap:
-        0;
-
-    margin-top:
-        10px;
-
-    margin-bottom:
-        20px;
-
-    padding:
-        24px;
-
-    text-align:
-        left;
-
-    background:
-        rgba(0, 255, 65, 0.025);
-
-    border:
-        1px solid rgba(0, 255, 65, 0.16);
-
-    border-radius:
-        12px;
-
-    box-shadow:
-        inset 0 0 30px rgba(0, 255, 65, 0.025);
+    padding: 28px;
+    text-align: left;
+    background: rgba(7, 12, 23, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 25px;
 }
-
-
-/* =========================================================
-   EMAIL HEADER
-========================================================= */
 
 .email-header {
-
-    text-align:
-        left;
-
-    margin-bottom:
-        25px;
-
-    padding-bottom:
-        18px;
-
-    border-bottom:
-        1px solid rgba(0, 255, 65, 0.12);
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
-
 
 .email-header h2 {
-
-    font-size:
-        21px;
-
-    margin-bottom:
-        7px;
-
-    color:
-        var(--green);
-
-    text-shadow:
-        0 0 8px rgba(0, 255, 65, 0.35);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--cyan);
+    margin-bottom: 6px;
 }
-
 
 .email-header p {
-
-    color:
-        var(--muted);
-
-    font-size:
-        13px;
-
-    line-height:
-        1.6;
+    color: var(--text-muted);
+    font-size: 13px;
 }
-
-
-/* =========================================================
-   FORM GROUP
-========================================================= */
 
 .form-group {
-
-    display:
-        flex;
-
-    flex-direction:
-        column;
-
-    text-align:
-        left;
-
-    margin-bottom:
-        20px;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    margin-bottom: 20px;
 }
-
-
-/* =========================================================
-   FORM LABEL
-========================================================= */
 
 .form-group label {
-
-    font-size:
-        14px;
-
-    font-weight:
-        bold;
-
-    color:
-        var(--text);
-
-    margin-bottom:
-        6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
-
 
 .form-group label span {
-
-    color:
-        var(--danger);
-
-    margin-left:
-        3px;
-
-    font-weight:
-        bold;
+    color: var(--danger);
+    margin-left: 4px;
 }
-
 
 .form-group label em {
-
-    font-size:
-        11px;
-
-    font-style:
-        normal;
-
-    font-weight:
-        normal;
-
-    color:
-        #6f9a7d;
-
-    margin-left:
-        5px;
+    font-size: 11px;
+    text-transform: none;
+    font-style: normal;
+    color: var(--text-muted);
+    margin-left: 6px;
 }
-
-
-/* =========================================================
-   FORM DESCRIPTION
-========================================================= */
-
-.form-group small {
-
-    color:
-        #6c977b;
-
-    font-size:
-        11px;
-
-    margin-bottom:
-        9px;
-
-    line-height:
-        1.5;
-}
-
-
-/* =========================================================
-   EMAIL INPUTS
-========================================================= */
 
 .form-group input,
-.form-group textarea {
-
-    width:
-        100%;
-
-    padding:
-        14px 15px;
-
-    border-radius:
-        8px;
-
-    border:
-        1px solid rgba(0, 255, 65, 0.18);
-
-    background:
-        #eafff0;
-
-    color:
-        #031008;
-
-    font-size:
-        14px;
-
-    font-family:
-        "Courier New",
-        monospace;
-
-    outline:
-        none;
-
-    transition:
-        border-color 0.25s ease,
-        box-shadow 0.25s ease,
-        transform 0.25s ease;
+.form-group textarea,
+#messageBox {
+    width: 100%;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-family: "Fira Code", "Courier New", monospace;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.25s ease;
 }
 
-
-/* =========================================================
-   INPUT HEIGHT
-========================================================= */
+#messageBox {
+    height: 180px;
+    margin-bottom: 25px;
+}
 
 .form-group input {
-
-    height:
-        50px;
+    height: 50px;
 }
-
-
-/* =========================================================
-   EMAIL BODY
-========================================================= */
 
 .form-group textarea {
-
-    min-height:
-        180px;
-
-    resize:
-        vertical;
-
-    line-height:
-        1.55;
+    min-height: 160px;
+    resize: vertical;
 }
-
-
-/* =========================================================
-   PLACEHOLDER
-========================================================= */
 
 .form-group input::placeholder,
-.form-group textarea::placeholder {
-
-    color:
-        #658373;
+.form-group textarea::placeholder,
+#messageBox::placeholder {
+    color: #475569;
 }
-
-
-/* =========================================================
-   INPUT HOVER
-========================================================= */
-
-.form-group input:hover,
-.form-group textarea:hover {
-
-    border-color:
-        rgba(0, 255, 65, 0.5);
-}
-
-
-/* =========================================================
-   INPUT FOCUS
-========================================================= */
 
 .form-group input:focus,
-.form-group textarea:focus {
-
-    border-color:
-        var(--green);
-
-    box-shadow:
-
-        0 0 5px rgba(0, 255, 65, 0.7),
-
-        0 0 20px rgba(0, 255, 65, 0.18);
-
-    transform:
-        translateY(-1px);
+.form-group textarea:focus,
+#messageBox:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15), 0 0 15px var(--cyan-glow);
+    background: rgba(15, 23, 42, 0.95);
 }
 
-
 /* =========================================================
-   MAIN CHECK BUTTON
+   ACTION BUTTONS
 ========================================================= */
 
 #checkButton {
-
-    padding:
-        14px 30px;
-
-    border:
-        1px solid var(--green);
-
-    border-radius:
-        8px;
-
-    background:
-        #00c853;
-
-    color:
-        #001b07;
-
-    font-family:
-        "Courier New",
-        monospace;
-
-    font-size:
-        16px;
-
-    font-weight:
-        bold;
-
-    cursor:
-        pointer;
-
-    position:
-        relative;
-
-    overflow:
-        hidden;
-
-    transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease,
-        background 0.25s ease;
-
-    box-shadow:
-
-        0 0 10px rgba(0, 255, 65, 0.35),
-
-        0 0 25px rgba(0, 255, 65, 0.12);
+    padding: 15px 36px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #00e5ff, #00ff66);
+    color: #030712;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 240, 255, 0.3);
 }
-
-
-/* Moving ray inside button */
 
 #checkButton::before {
-
-    content:
-        "";
-
-    position:
-        absolute;
-
-    top:
-        0;
-
-    left:
-        -120%;
-
-    width:
-        70%;
-
-    height:
-        100%;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.55),
-            transparent
-        );
-
-    transform:
-        skewX(-20deg);
-
-    animation:
-        buttonScan 2.5s linear infinite;
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: skewX(-20deg);
+    animation: buttonGlowScan 3s infinite;
 }
-
 
 #checkButton:hover {
-
-    transform:
-        translateY(-3px);
-
-    background:
-        var(--green);
-
-    box-shadow:
-
-        0 0 15px var(--green),
-
-        0 0 40px rgba(0, 255, 65, 0.35);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(0, 255, 102, 0.4);
 }
-
 
 #checkButton:active {
-
-    transform:
-        translateY(0);
+    transform: translateY(0);
 }
-
 
 #checkButton:disabled {
-
-    opacity:
-        0.45;
-
-    cursor:
-        not-allowed;
-
-    box-shadow:
-        none;
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
 }
-
-
-/* =========================================================
-   CLEAR BUTTON
-========================================================= */
 
 #clearButton {
-
-    margin-left:
-        10px;
-
-    padding:
-        14px 25px;
-
-    background:
-        rgba(0, 255, 65, 0.025);
-
-    border:
-        1px solid rgba(0, 255, 65, 0.20);
-
-    color:
-        var(--muted);
-
-    border-radius:
-        8px;
-
-    font-family:
-        "Courier New",
-        monospace;
-
-    cursor:
-        pointer;
-
-    transition:
-        all 0.25s ease;
+    margin-left: 12px;
+    padding: 15px 28px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
 }
-
 
 #clearButton:hover {
-
-    color:
-        var(--green);
-
-    border-color:
-        var(--green);
-
-    background:
-        rgba(0, 255, 65, 0.08);
-
-    box-shadow:
-        0 0 15px rgba(0, 255, 65, 0.18);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.08);
 }
 
-
 /* =========================================================
-   RESULT CARD
+   ANALYSIS & RESULT PANEL
 ========================================================= */
 
 .result {
-
-    margin-top:
-        28px;
-
-    padding:
-        25px;
-
-    border-radius:
-        12px;
-
-    background:
-        rgba(0, 255, 65, 0.025);
-
-    border:
-        1px solid rgba(0, 255, 65, 0.20);
-
-    display:
-        none;
-
-    text-align:
-        left;
-
-    box-shadow:
-        inset 0 0 30px rgba(0, 255, 65, 0.025);
-
-    animation:
-        neonBreathing 4s ease infinite;
+    margin-top: 35px;
+    padding: 28px;
+    border-radius: 14px;
+    background: rgba(7, 12, 23, 0.8);
+    border: 1px solid var(--panel-border);
+    display: none;
+    text-align: left;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
 }
-
-
-/* =========================================================
-   RESULT TITLE
-========================================================= */
 
 .result h2 {
-
-    text-align:
-        center;
-
-    margin-bottom:
-        10px;
-
-    font-size:
-        21px;
-
-    color:
-        var(--green);
-
-    text-shadow:
-        0 0 10px rgba(0, 255, 65, 0.4);
+    text-align: center;
+    margin-bottom: 16px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--cyan);
 }
-
-
-/* =========================================================
-   RISK BAR
-========================================================= */
 
 .risk-bar {
-
-    width:
-        100%;
-
-    height:
-        12px;
-
-    margin-top:
-        15px;
-
-    border-radius:
-        20px;
-
-    background:
-        rgba(0, 255, 65, 0.07);
-
-    border:
-        1px solid rgba(0, 255, 65, 0.12);
-
-    overflow:
-        hidden;
+    width: 100%;
+    height: 10px;
+    margin-top: 15px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
 }
-
-
-/* =========================================================
-   RISK LEVEL
-========================================================= */
 
 .risk-level {
-
-    width:
-        0%;
-
-    height:
-        100%;
-
-    border-radius:
-        20px;
-
-    background:
-        linear-gradient(
-            90deg,
-            #00ff41,
-            #b6ff00,
-            #ffd000,
-            #ff3131
-        );
-
-    box-shadow:
-        0 0 12px rgba(0, 255, 65, 0.6);
-
-    transition:
-        width 1s ease;
+    width: 0%;
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, var(--green), var(--warning), var(--danger));
+    box-shadow: 0 0 10px var(--cyan-glow);
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-
-/* =========================================================
-   AI EXPLANATION
-========================================================= */
 
 .analysis {
-
-    margin-top:
-        18px;
-
-    color:
-        #b5ddc2;
-
-    font-size:
-        14px;
-
-    line-height:
-        1.7;
-
-    border-left:
-        2px solid var(--green);
-
-    padding-left:
-        15px;
-
-    background:
-        rgba(0, 255, 65, 0.02);
+    margin-top: 20px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.7;
+    border-left: 3px solid var(--cyan);
+    padding-left: 18px;
+    background: rgba(0, 240, 255, 0.02);
 }
 
-
 /* =========================================================
-   SCROLLBAR
+   SCROLLBAR & SELECTION
 ========================================================= */
 
 ::-webkit-scrollbar {
-
-    width:
-        8px;
+    width: 8px;
 }
-
 
 ::-webkit-scrollbar-track {
-
-    background:
-        #010503;
+    background: var(--bg-dark);
 }
-
 
 ::-webkit-scrollbar-thumb {
-
-    background:
-        rgba(0, 255, 65, 0.35);
-
-    border-radius:
-        10px;
-
-    box-shadow:
-        0 0 8px rgba(0, 255, 65, 0.4);
+    background: rgba(0, 240, 255, 0.25);
+    border-radius: 4px;
 }
-
 
 ::-webkit-scrollbar-thumb:hover {
-
-    background:
-        var(--green);
+    background: var(--cyan);
 }
-
-
-/* =========================================================
-   TEXT SELECTION
-========================================================= */
 
 ::selection {
-
-    background:
-        rgba(0, 255, 65, 0.30);
-
-    color:
-        white;
+    background: var(--cyan);
+    color: #000000;
 }
-
 
 /* =========================================================
    MOBILE RESPONSIVE
 ========================================================= */
 
 @media (max-width: 600px) {
-
     body {
-
-        padding:
-            15px;
-
-        align-items:
-            flex-start;
+        padding: 15px;
     }
-
 
     .container {
-
-        padding:
-            25px 18px;
-
-        margin-top:
-            20px;
-
-        border-radius:
-            14px;
+        padding: 25px 18px;
     }
-
 
     h1 {
-
-        font-size:
-            31px;
-
-        letter-spacing:
-            1px;
+        font-size: 28px;
     }
-
-
-    .logo {
-
-        font-size:
-            40px;
-    }
-
-
-    .subtitle {
-
-        font-size:
-            13px;
-
-        margin-bottom:
-            22px;
-    }
-
-
-    .scan-options {
-
-        gap:
-            8px;
-    }
-
 
     .scan-options button {
-
-        padding:
-            10px 15px;
-
-        font-size:
-            13px;
+        width: 100%;
     }
 
-
-    #emailScanner {
-
-        padding:
-            17px;
-    }
-
-
-    .email-header h2 {
-
-        font-size:
-            19px;
-    }
-
-
-    .email-header p {
-
-        font-size:
-            12px;
-    }
-
-
-    .form-group {
-
-        margin-bottom:
-            16px;
-    }
-
-
-    .form-group input {
-
-        height:
-            47px;
-    }
-
-
-    .form-group textarea {
-
-        min-height:
-            150px;
-    }
-
-
-    #messageBox {
-
-        height:
-            160px;
-    }
-
-
-    #checkButton,
-    #clearButton {
-
-        width:
-            100%;
-
-        margin:
-            5px 0;
-    }
-
-
-    .result {
-
-        padding:
-            19px;
-    }
-
-
-    .result h2 {
-
-        font-size:
-            18px;
-    }
-
-
-    body::after {
-
-        height:
-            2px;
+    #checkButton, #clearButton {
+        width: 100%;
+        margin: 6px 0;
     }
 }
-
 
 /* =========================================================
    ACCESSIBILITY
 ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-
-    *,
-    *::before,
-    *::after {
-
-        animation:
-            none !important;
-
-        transition:
-            none !important;
+    *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
     }
 }

@@ -206,17 +206,20 @@ checkButton.addEventListener("click", async function () {
             // ==================================================
             // BACKEND CONNECTION
             // ==================================================
+ 
+            resultBox.innerHTML = `
+    <div class="scanning">
+        🔍 Scanning URL...
+    </div>
+`;
 
-            const response = await fetch(
-                "/check-url",
-                {
-
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
+const response = await fetch(
+    "/check-url",
+    {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
                     body: JSON.stringify({
                         url: url
                     })

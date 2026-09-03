@@ -585,7 +585,7 @@ ${virusTotal.httpStatus || "Unknown"}
 `;
 
     const response = await gemini.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.6-flash",
         contents: prompt
     });
 
