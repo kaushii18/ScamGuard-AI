@@ -1,10 +1,14 @@
 // ==================================================
+// SCAMGUARD AI - SCRIPT.JS
+// ==================================================
+
+
+// ==================================================
 // SOAP BUBBLE CLICK EFFECT
 // ==================================================
 
 document.addEventListener("click", function (e) {
 
-    // Don't create bubbles when clicking form controls/buttons
     if (
         e.target.tagName === "BUTTON" ||
         e.target.tagName === "INPUT" ||
@@ -14,22 +18,17 @@ document.addEventListener("click", function (e) {
     }
 
     const bubble = document.createElement("div");
-
     bubble.classList.add("soap-bubble");
 
-    // Random size: 30px - 70px
     const size = Math.floor(Math.random() * 40) + 30;
 
     bubble.style.width = `${size}px`;
     bubble.style.height = `${size}px`;
-
-    // Exact click position
     bubble.style.left = `${e.clientX - size / 2}px`;
     bubble.style.top = `${e.clientY - size / 2}px`;
 
     document.body.appendChild(bubble);
 
-    // Remove after animation
     setTimeout(() => {
         bubble.remove();
     }, 1800);
@@ -57,8 +56,6 @@ const checkButton = document.querySelector("#checkButton");
 const clearButton = document.querySelector("#clearButton");
 
 const resultBox = document.querySelector(".result");
-const riskLevel = document.querySelector(".risk-level");
-const analysis = document.querySelector(".analysis");
 
 const messageOption = document.querySelector("#messageOption");
 const emailOption = document.querySelector("#emailOption");
@@ -66,27 +63,138 @@ const urlOption = document.querySelector("#urlOption");
 
 
 // ==================================================
-// DEFAULT: MESSAGE
+// CHECK REQUIRED ELEMENTS
 // ==================================================
 
-messageOption.classList.add("active");
-emailOption.classList.remove("active");
-urlOption.classList.remove("active");
+if (
+    !messageBox ||
+    !senderEmail ||
+    !emailSubject ||
+    !emailBody ||
+    !emailLink ||
+    !urlInput ||
+    !messageScanner ||
+    !emailScanner ||
+    !urlScanner ||
+    !checkButton ||
+    !clearButton ||
+    !resultBox ||
+    !messageOption ||
+    !emailOption ||
+    !urlOption
+) {
 
-messageScanner.style.display = "block";
-emailScanner.style.display = "none";
-urlScanner.style.display = "none";
+    console.error(
+        "❌ ScamGuard AI: One or more HTML elements are missing."
+    );
 
-checkButton.textContent = "🔍 Check Message";
+}
 
 
 // ==================================================
-// MESSAGE OPTION
+// HELPER - ESCAPE HTML
 // ==================================================
 
-messageOption.addEventListener("click", function () {
+function escapeHTML(value) {
 
-    console.log("💬 Message button clicked");
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+// ==================================================
+// HELPER - SHOW RESULT
+// ==================================================
+
+function showResultBox() {
+
+    resultBox.style.display = "block";
+
+}
+
+
+// ==================================================
+// HELPER - RISK TEXT
+// ==================================================
+
+function getRiskText(risk) {
+
+    if (risk >= 70) {
+
+        return `🚨 High Scam Risk: ${Math.round(risk)}%`;
+
+    }
+
+    if (risk >= 30) {
+
+        return `⚠️ Possible Scam: ${Math.round(risk)}%`;
+
+    }
+
+    return `✅ Low Scam Risk: ${Math.round(risk)}%`;
+
+}
+
+
+// ==================================================
+// HELPER - DISPLAY BASIC RESULT
+// ==================================================
+
+function displayBasicResult(risk, explanation) {
+
+    const safeRisk = Math.max(
+        0,
+        Math.min(100, Number(risk))
+    );
+
+    resultBox.innerHTML = `
+
+        <h2>
+            ${getRiskText(safeRisk)}
+        </h2>
+
+        <div class="risk-score-display">
+
+            <span class="risk-number">
+                ${Math.round(safeRisk)}
+            </span>
+
+            <span class="risk-out-of">
+                / 100
+            </span>
+
+        </div>
+
+        <div class="risk-bar">
+
+            <div
+                class="risk-level"
+                style="width: ${safeRisk}%"
+            ></div>
+
+        </div>
+
+        <div class="analysis">
+            ${escapeHTML(
+                explanation || "No explanation received."
+            )}
+        </div>
+
+    `;
+
+}
+
+
+// ==================================================
+// DEFAULT MESSAGE MODE
+// ==================================================
+
+function setMessageMode() {
 
     messageOption.classList.add("active");
     emailOption.classList.remove("active");
@@ -100,16 +208,14 @@ messageOption.addEventListener("click", function () {
 
     resultBox.style.display = "none";
 
-});
+}
 
 
 // ==================================================
-// EMAIL OPTION
+// EMAIL MODE
 // ==================================================
 
-emailOption.addEventListener("click", function () {
-
-    console.log("📧 Email button clicked");
+function setEmailMode() {
 
     messageOption.classList.remove("active");
     emailOption.classList.add("active");
@@ -123,16 +229,14 @@ emailOption.addEventListener("click", function () {
 
     resultBox.style.display = "none";
 
-});
+}
 
 
 // ==================================================
-// URL / LINK OPTION
+// URL MODE
 // ==================================================
 
-urlOption.addEventListener("click", function () {
-
-    console.log("🔗 URL / Link button clicked");
+function setURLMode() {
 
     messageOption.classList.remove("active");
     emailOption.classList.remove("active");
@@ -146,345 +250,536 @@ urlOption.addEventListener("click", function () {
 
     resultBox.style.display = "none";
 
-});
+}
 
 
 // ==================================================
-// CHECK BUTTON
+// OPTION BUTTONS
 // ==================================================
 
-checkButton.addEventListener("click", async function () {
+messageOption.addEventListener(
+    "click",
+    setMessageMode
+);
+
+emailOption.addEventListener(
+    "click",
+    setEmailMode
+);
+
+urlOption.addEventListener(
+    "click",
+    setURLMode
+);
 
 
-    // ==================================================
-    // URL SCANNER
-    // ==================================================
+// ==================================================
+// URL SECURITY DETAILS
+// ==================================================
 
-    if (urlOption.classList.contains("active")) {
+function displayURLSecurityDetails(data) {
 
-        const url = urlInput.value.trim();
+    const details = data.details || {};
 
-        // Validate
-        if (!url) {
+    const liveCheck =
+        details.liveCheck || {};
 
-            alert("Please enter a URL first.");
+    const signals =
+        Array.isArray(details.signals)
+            ? details.signals
+            : [];
 
-            return;
-        }
+    const resolvedIPs =
+        Array.isArray(details.resolvedIPs)
+            ? details.resolvedIPs
+            : [];
 
-        // Basic URL format validation
-        try {
-
-            new URL(url);
-
-        }
-
-        catch {
-
-            alert(
-                "Please enter a valid URL.\nExample: https://example.com"
-            );
-
-            return;
-        }
+    const virusTotal =
+        details.virusTotal || null;
 
 
-        // Loading
-        checkButton.disabled = true;
+    // Remove previous details
 
-        checkButton.textContent =
-            "🔗 Checking URL...";
+    const oldDetails =
+        resultBox.querySelector(
+            ".url-security-details"
+        );
 
-        resultBox.style.display = "block";
-
-        analysis.textContent =
-            "Analyzing the URL and collecting real-time security information...";
-
-
-        try {
-
-            // ==================================================
-            // BACKEND CONNECTION
-            // ==================================================
- 
-            resultBox.innerHTML = `
-    <div class="scanning">
-        🔍 Scanning URL...
-    </div>
-`;
-
-const response = await fetch(
-    "/check-url",
-    {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-                    body: JSON.stringify({
-                        url: url
-                    })
-
-                }
-            );
-
-
-            const data =
-                await response.json();
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.error ||
-                    "URL analysis failed."
-                );
-
-            }
-
-
-            // ==================================================
-            // DYNAMIC RISK RESULT
-            // ==================================================
-
-            const risk =
-                Number(data.risk);
-
-
-            // Safety check
-            if (Number.isNaN(risk)) {
-
-                throw new Error(
-                    "Invalid risk value returned by server."
-                );
-
-            }
-
-
-            // Risk bar
-            riskLevel.style.width =
-                `${Math.max(0, Math.min(100, risk))}%`;
-
-
-            // Risk message
-            if (risk >= 70) {
-
-                resultBox.querySelector("h2").textContent =
-                    `🚨 High Scam Risk: ${risk}%`;
-
-            }
-
-            else if (risk >= 30) {
-
-                resultBox.querySelector("h2").textContent =
-                    `⚠️ Possible Scam: ${risk}%`;
-
-            }
-
-            else {
-
-                resultBox.querySelector("h2").textContent =
-                    `✅ Low Scam Risk: ${risk}%`;
-
-            }
-
-
-            // AI explanation
-            analysis.textContent =
-                data.explanation ||
-                "No explanation received.";
-
-        }
-
-
-        catch (error) {
-
-            console.error(
-                "❌ URL Analysis Error:",
-                error
-            );
-
-            resultBox.querySelector("h2").textContent =
-                "❌ URL Analysis Error";
-
-            analysis.textContent =
-                "Unable to analyze the URL. Please check your server and API configuration.";
-
-        }
-
-
-        finally {
-
-            checkButton.disabled = false;
-
-            checkButton.textContent =
-                "🔗 Check URL";
-
-        }
-
-        return;
+    if (oldDetails) {
+        oldDetails.remove();
     }
 
 
+    // Main container
+
+    const container =
+        document.createElement("div");
+
+    container.className =
+        "url-security-details";
+
+
     // ==================================================
-    // EMAIL SCANNER
+    // TECHNICAL INFORMATION
     // ==================================================
 
-    if (emailOption.classList.contains("active")) {
+    const technicalCard =
+        document.createElement("div");
 
-        const sender = senderEmail.value.trim();
-        const subject = emailSubject.value.trim();
-        const body = emailBody.value.trim();
-        const link = emailLink.value.trim();
+    technicalCard.className =
+        "security-card";
 
+    technicalCard.innerHTML = `
 
-        // Validate
-        if (!sender || !subject || !body) {
+        <h3>
+            🔎 Technical URL Information
+        </h3>
 
-            alert(
-                "Please enter sender email, subject and email content."
-            );
+        <div class="security-grid">
 
-            return;
-        }
+            <div class="security-item">
 
+                <span>
+                    Hostname
+                </span>
 
-        // Loading
-        checkButton.disabled = true;
+                <strong>
+                    ${escapeHTML(
+                        details.hostname || "Unknown"
+                    )}
+                </strong>
 
-        checkButton.textContent =
-            "📧 Checking Email...";
-
-        resultBox.style.display =
-            "block";
-
-        analysis.textContent =
-            "AI is analyzing the email...";
+            </div>
 
 
-        try {
+            <div class="security-item">
 
-            const response = await fetch(
-                "/check-email",
-                {
+                <span>
+                    Protocol
+                </span>
 
-                    method: "POST",
+                <strong>
+                    ${escapeHTML(
+                        details.protocol || "Unknown"
+                    )}
+                </strong>
 
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        sender: sender,
-                        subject: subject,
-                        body: body,
-                        link: link
-                    })
-
-                }
-            );
+            </div>
 
 
-            const data =
-                await response.json();
+            <div class="security-item">
+
+                <span>
+                    Resolved IP
+                </span>
+
+                <strong>
+                    ${
+                        resolvedIPs.length
+                            ? escapeHTML(
+                                resolvedIPs.join(", ")
+                              )
+                            : "Not available"
+                    }
+                </strong>
+
+            </div>
 
 
-            if (!response.ok) {
+            <div class="security-item">
 
-                throw new Error(
-                    data.error ||
-                    "Email analysis failed."
+                <span>
+                    AI Engine
+                </span>
+
+                <strong>
+                    🤖 ${escapeHTML(
+                        details.aiEngine || "Gemini"
+                    )}
+                </strong>
+
+            </div>
+
+        </div>
+
+    `;
+
+    container.appendChild(
+        technicalCard
+    );
+
+
+    // ==================================================
+    // LIVE SERVER CHECK
+    // ==================================================
+
+    const liveCard =
+        document.createElement("div");
+
+    liveCard.className =
+        "security-card";
+
+
+    const reachable =
+        liveCheck.reachable === true;
+
+    const status =
+        liveCheck.status || "Unknown";
+
+    const finalURL =
+        liveCheck.finalURL || "Unknown";
+
+    const redirects =
+        Array.isArray(liveCheck.redirects)
+            ? liveCheck.redirects
+            : [];
+
+
+    liveCard.innerHTML = `
+
+        <h3>
+            🌐 Live Server Check
+        </h3>
+
+        <div class="security-grid">
+
+            <div class="security-item">
+
+                <span>
+                    Server Status
+                </span>
+
+                <strong>
+                    ${
+                        reachable
+                            ? "🟢 Reachable"
+                            : "🔴 Not reachable"
+                    }
+                </strong>
+
+            </div>
+
+
+            <div class="security-item">
+
+                <span>
+                    HTTP Status
+                </span>
+
+                <strong>
+                    ${escapeHTML(
+                        String(status)
+                    )}
+                </strong>
+
+            </div>
+
+
+            <div class="security-item">
+
+                <span>
+                    Final URL
+                </span>
+
+                <strong>
+                    ${escapeHTML(
+                        finalURL
+                    )}
+                </strong>
+
+            </div>
+
+
+            <div class="security-item">
+
+                <span>
+                    Redirects
+                </span>
+
+                <strong>
+                    ${redirects.length}
+                </strong>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    // Redirects
+
+    if (redirects.length > 0) {
+
+        const redirectList =
+            document.createElement("div");
+
+        redirectList.className =
+            "redirect-list";
+
+        redirectList.innerHTML =
+            "<h4>↪️ Redirect Chain</h4>";
+
+
+        redirects.forEach(
+            (redirect, index) => {
+
+                const item =
+                    document.createElement("div");
+
+                item.className =
+                    "redirect-item";
+
+                item.textContent =
+                    `${index + 1}. ${redirect}`;
+
+                redirectList.appendChild(
+                    item
                 );
 
             }
+        );
 
 
-            const risk =
-                Number(data.risk);
+        liveCard.appendChild(
+            redirectList
+        );
 
-
-            // Safety check
-            if (Number.isNaN(risk)) {
-
-                throw new Error(
-                    "Invalid risk value returned by server."
-                );
-
-            }
-
-
-            riskLevel.style.width =
-                `${Math.max(0, Math.min(100, risk))}%`;
-
-
-            // Risk message
-            if (risk >= 70) {
-
-                resultBox.querySelector("h2").textContent =
-                    `🚨 High Scam Risk: ${risk}%`;
-
-            }
-
-            else if (risk >= 30) {
-
-                resultBox.querySelector("h2").textContent =
-                    `⚠️ Possible Scam: ${risk}%`;
-
-            }
-
-            else {
-
-                resultBox.querySelector("h2").textContent =
-                    `✅ Low Scam Risk: ${risk}%`;
-
-            }
-
-
-            // AI explanation
-            analysis.textContent =
-                data.explanation ||
-                "No explanation received.";
-
-        }
-
-
-        catch (error) {
-
-            console.error(
-                "❌ Email Analysis Error:",
-                error
-            );
-
-            resultBox.querySelector("h2").textContent =
-                "❌ Email Analysis Error";
-
-            analysis.textContent =
-                "Unable to analyze the email. Please check your server and API key.";
-
-        }
-
-
-        finally {
-
-            checkButton.disabled = false;
-
-            checkButton.textContent =
-                "📧 Check Email";
-
-        }
-
-        return;
     }
 
 
+    container.appendChild(
+        liveCard
+    );
+
+
     // ==================================================
-    // MESSAGE SCANNER
+    // SECURITY SIGNALS
     // ==================================================
+
+    const signalsCard =
+        document.createElement("div");
+
+    signalsCard.className =
+        "security-card";
+
+
+    signalsCard.innerHTML = `
+        <h3>
+            ⚠️ Security Signals
+        </h3>
+    `;
+
+
+    if (signals.length === 0) {
+
+        const safeMessage =
+            document.createElement("div");
+
+        safeMessage.className =
+            "signal-safe";
+
+        safeMessage.textContent =
+            "✅ No major technical warning signals detected.";
+
+        signalsCard.appendChild(
+            safeMessage
+        );
+
+    }
+
+    else {
+
+        const signalList =
+            document.createElement("div");
+
+        signalList.className =
+            "signal-list";
+
+
+        signals.forEach(
+            signal => {
+
+                const item =
+                    document.createElement("div");
+
+                item.className =
+                    "signal-item";
+
+                item.innerHTML = `
+
+                    <span>
+                        ⚠️
+                    </span>
+
+                    <span>
+                        ${escapeHTML(signal)}
+                    </span>
+
+                `;
+
+                signalList.appendChild(
+                    item
+                );
+
+            }
+        );
+
+
+        signalsCard.appendChild(
+            signalList
+        );
+
+    }
+
+
+    container.appendChild(
+        signalsCard
+    );
+
+
+    // ==================================================
+    // VIRUSTOTAL
+    // ==================================================
+
+    if (virusTotal) {
+
+        const vtCard =
+            document.createElement("div");
+
+        vtCard.className =
+            "security-card";
+
+
+        if (virusTotal.available) {
+
+            vtCard.innerHTML = `
+
+                <h3>
+                    🛡️ Threat Intelligence
+                </h3>
+
+                <div class="security-grid">
+
+                    <div class="security-item">
+
+                        <span>
+                            Database
+                        </span>
+
+                        <strong>
+                            VirusTotal
+                        </strong>
+
+                    </div>
+
+
+                    <div class="security-item">
+
+                        <span>
+                            Status
+                        </span>
+
+                        <strong>
+                            ${
+                                virusTotal.found
+                                    ? "🟢 URL Found"
+                                    : "⚪ Not Found"
+                            }
+                        </strong>
+
+                    </div>
+
+
+                    <div class="security-item">
+
+                        <span>
+                            Malicious
+                        </span>
+
+                        <strong>
+                            ${
+                                virusTotal
+                                    .analysisStats
+                                    ?.malicious
+                                ?? "Unknown"
+                            }
+                        </strong>
+
+                    </div>
+
+
+                    <div class="security-item">
+
+                        <span>
+                            Suspicious
+                        </span>
+
+                        <strong>
+                            ${
+                                virusTotal
+                                    .analysisStats
+                                    ?.suspicious
+                                ?? "Unknown"
+                            }
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+
+        else {
+
+            vtCard.innerHTML = `
+
+                <h3>
+                    🛡️ Threat Intelligence
+                </h3>
+
+                <div class="security-info">
+
+                    ℹ️ VirusTotal is not configured.
+
+                    ScamGuard is using technical
+                    URL inspection and Gemini AI.
+
+                </div>
+
+            `;
+
+        }
+
+
+        container.appendChild(
+            vtCard
+        );
+
+    }
+
+
+    // Add details
+
+    resultBox.appendChild(
+        container
+    );
+
+}
+
+
+// ==================================================
+// CHECK MESSAGE
+// ==================================================
+
+async function checkMessage() {
 
     const message =
         messageBox.value.trim();
 
 
-    // Validate
     if (!message) {
 
         alert(
@@ -495,37 +790,48 @@ const response = await fetch(
     }
 
 
-    // Loading
     checkButton.disabled = true;
 
     checkButton.textContent =
         "🔍 Checking...";
 
-    resultBox.style.display =
-        "block";
+    showResultBox();
 
-    analysis.textContent =
-        "AI is analyzing the message...";
+
+    resultBox.innerHTML = `
+
+        <h2>
+            🔍 Analyzing Message...
+        </h2>
+
+        <div class="analysis">
+            AI is analyzing the message...
+        </div>
+
+    `;
 
 
     try {
 
-        const response = await fetch(
-            "/check-message",
-            {
+        const response =
+            await fetch(
+                "/check-message",
+                {
 
-                method: "POST",
+                    method: "POST",
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-                body: JSON.stringify({
-                    message: message
-                })
+                    body:
+                        JSON.stringify({
+                            message: message
+                        })
 
-            }
-        );
+                }
+            );
 
 
         const data =
@@ -546,7 +852,6 @@ const response = await fetch(
             Number(data.risk);
 
 
-        // Safety check
         if (Number.isNaN(risk)) {
 
             throw new Error(
@@ -556,41 +861,12 @@ const response = await fetch(
         }
 
 
-        // Risk bar
-        riskLevel.style.width =
-            `${Math.max(0, Math.min(100, risk))}%`;
-
-
-        // Risk message
-        if (risk >= 70) {
-
-            resultBox.querySelector("h2").textContent =
-                `🚨 High Scam Risk: ${risk}%`;
-
-        }
-
-        else if (risk >= 30) {
-
-            resultBox.querySelector("h2").textContent =
-                `⚠️ Possible Scam: ${risk}%`;
-
-        }
-
-        else {
-
-            resultBox.querySelector("h2").textContent =
-                `✅ Low Scam Risk: ${risk}%`;
-
-        }
-
-
-        // AI explanation
-        analysis.textContent =
-            data.explanation ||
-            "No explanation received.";
+        displayBasicResult(
+            risk,
+            data.explanation
+        );
 
     }
-
 
     catch (error) {
 
@@ -599,14 +875,25 @@ const response = await fetch(
             error
         );
 
-        resultBox.querySelector("h2").textContent =
-            "❌ Message Analysis Error";
 
-        analysis.textContent =
-            "Unable to analyze the message. Please check your server and API key.";
+        resultBox.innerHTML = `
+
+            <h2>
+                ❌ Message Analysis Error
+            </h2>
+
+            <div class="analysis">
+
+                ${escapeHTML(
+                    error.message ||
+                    "Unable to analyze message."
+                )}
+
+            </div>
+
+        `;
 
     }
-
 
     finally {
 
@@ -617,48 +904,531 @@ const response = await fetch(
 
     }
 
-});
+}
+
+
+// ==================================================
+// CHECK EMAIL
+// ==================================================
+
+async function checkEmail() {
+
+    const sender =
+        senderEmail.value.trim();
+
+    const subject =
+        emailSubject.value.trim();
+
+    const body =
+        emailBody.value.trim();
+
+    const link =
+        emailLink.value.trim();
+
+
+    if (!sender || !subject || !body) {
+
+        alert(
+            "Please enter sender email, subject and email content."
+        );
+
+        return;
+    }
+
+
+    checkButton.disabled = true;
+
+    checkButton.textContent =
+        "📧 Checking Email...";
+
+    showResultBox();
+
+
+    resultBox.innerHTML = `
+
+        <h2>
+            📧 Analyzing Email...
+        </h2>
+
+        <div class="analysis">
+            AI is analyzing the email...
+        </div>
+
+    `;
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/check-email",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            sender: sender,
+
+                            subject: subject,
+
+                            body: body,
+
+                            link: link
+
+                        })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Email analysis failed."
+            );
+
+        }
+
+
+        const risk =
+            Number(data.risk);
+
+
+        if (Number.isNaN(risk)) {
+
+            throw new Error(
+                "Invalid risk value returned by server."
+            );
+
+        }
+
+
+        displayBasicResult(
+            risk,
+            data.explanation
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "❌ Email Analysis Error:",
+            error
+        );
+
+
+        resultBox.innerHTML = `
+
+            <h2>
+                ❌ Email Analysis Error
+            </h2>
+
+            <div class="analysis">
+
+                ${escapeHTML(
+                    error.message ||
+                    "Unable to analyze email."
+                )}
+
+            </div>
+
+        `;
+
+    }
+
+    finally {
+
+        checkButton.disabled = false;
+
+        checkButton.textContent =
+            "📧 Check Email";
+
+    }
+
+}
+
+
+// ==================================================
+// CHECK URL
+// ==================================================
+
+async function checkURL() {
+
+    const url =
+        urlInput.value.trim();
+
+
+    if (!url) {
+
+        alert(
+            "Please enter a URL first."
+        );
+
+        return;
+    }
+
+
+    // Validate URL
+
+    let parsedURL;
+
+    try {
+
+        parsedURL =
+            new URL(url);
+
+    }
+
+    catch {
+
+        alert(
+            "Please enter a valid URL.\nExample: https://example.com"
+        );
+
+        return;
+    }
+
+
+    // Only HTTP / HTTPS
+
+    if (
+        parsedURL.protocol !== "http:" &&
+        parsedURL.protocol !== "https:"
+    ) {
+
+        alert(
+            "Only HTTP and HTTPS URLs are supported."
+        );
+
+        return;
+    }
+
+
+    checkButton.disabled = true;
+
+    checkButton.textContent =
+        "🔗 Checking URL...";
+
+    showResultBox();
+
+
+    resultBox.innerHTML = `
+
+        <h2>
+            🔍 Scanning URL...
+        </h2>
+
+        <div class="scanning">
+
+            Collecting DNS information,
+            checking the live server,
+            inspecting redirects
+            and running Gemini AI analysis...
+
+        </div>
+
+    `;
+
+
+    try {
+
+        console.log(
+            "🔗 Sending URL:",
+            url
+        );
+
+
+        const response =
+            await fetch(
+                "/check-url",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            url: url
+                        })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "🔎 URL Server Response:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                data.details ||
+                "URL analysis failed."
+            );
+
+        }
+
+
+        const risk =
+            Number(data.risk);
+
+
+        if (Number.isNaN(risk)) {
+
+            throw new Error(
+                "Invalid risk value returned by server."
+            );
+
+        }
+
+
+        // ==================================================
+        // DISPLAY MAIN RESULT
+        // ==================================================
+
+        resultBox.innerHTML = `
+
+            <h2>
+                ⚠️ Risk Analysis
+            </h2>
+
+            <div class="risk-score-display">
+
+                <span class="risk-number">
+
+                    ${Math.round(risk)}
+
+                </span>
+
+                <span class="risk-out-of">
+
+                    / 100
+
+                </span>
+
+            </div>
+
+
+            <div class="risk-bar">
+
+                <div
+                    class="risk-level"
+                    style="width: ${Math.max(
+                        0,
+                        Math.min(100, risk)
+                    )}%"
+                ></div>
+
+            </div>
+
+
+            <div class="analysis">
+
+                ${escapeHTML(
+                    data.explanation ||
+                    "No explanation received."
+                )}
+
+            </div>
+
+        `;
+
+
+        // Update heading
+
+        const heading =
+            resultBox.querySelector("h2");
+
+
+        if (risk >= 70) {
+
+            heading.textContent =
+                `🚨 High Scam Risk: ${Math.round(risk)}%`;
+
+        }
+
+        else if (risk >= 30) {
+
+            heading.textContent =
+                `⚠️ Possible Scam: ${Math.round(risk)}%`;
+
+        }
+
+        else {
+
+            heading.textContent =
+                `✅ Low Scam Risk: ${Math.round(risk)}%`;
+
+        }
+
+
+        // ==================================================
+        // DISPLAY URL DETAILS
+        // ==================================================
+
+        displayURLSecurityDetails(
+            data
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "❌ URL Analysis Error:",
+            error
+        );
+
+
+        resultBox.innerHTML = `
+
+            <h2>
+                ❌ URL Analysis Error
+            </h2>
+
+            <div class="analysis">
+
+                ${escapeHTML(
+                    error.message ||
+                    "Unable to analyze the URL."
+                )}
+
+            </div>
+
+        `;
+
+    }
+
+    finally {
+
+        checkButton.disabled = false;
+
+        checkButton.textContent =
+            "🔗 Check URL";
+
+    }
+
+}
+
+
+// ==================================================
+// CHECK BUTTON
+// ==================================================
+
+checkButton.addEventListener(
+    "click",
+    async function () {
+
+        if (
+            urlOption.classList.contains("active")
+        ) {
+
+            await checkURL();
+
+            return;
+        }
+
+
+        if (
+            emailOption.classList.contains("active")
+        ) {
+
+            await checkEmail();
+
+            return;
+        }
+
+
+        await checkMessage();
+
+    }
+);
 
 
 // ==================================================
 // CLEAR BUTTON
 // ==================================================
 
-clearButton.addEventListener("click", function () {
+clearButton.addEventListener(
+    "click",
+    function () {
+
+        // Clear message
+
+        messageBox.value = "";
 
 
-    // Clear message
-    messageBox.value = "";
+        // Clear email
+
+        senderEmail.value = "";
+
+        emailSubject.value = "";
+
+        emailBody.value = "";
+
+        emailLink.value = "";
 
 
-    // Clear email
-    senderEmail.value = "";
-    emailSubject.value = "";
-    emailBody.value = "";
-    emailLink.value = "";
+        // Clear URL
+
+        urlInput.value = "";
 
 
-    // Clear URL
-    urlInput.value = "";
+        // Hide result
+
+        resultBox.style.display =
+            "none";
 
 
-    // Hide result
-    resultBox.style.display =
-        "none";
+        // Clear result
+
+        resultBox.innerHTML = `
+
+            <h2>
+                ⚠️ Risk Analysis
+            </h2>
+
+        `;
 
 
-    // Reset risk bar
-    riskLevel.style.width =
-        "0%";
+        console.log(
+            "🗑️ ScamGuard AI cleared."
+        );
+
+    }
+);
 
 
-    // Clear explanation
-    analysis.textContent =
-        "";
+// ==================================================
+// START APPLICATION
+// ==================================================
 
+setMessageMode();
 
-    // Reset result title
-    resultBox.querySelector("h2").textContent =
-        "⚠️ Risk Analysis";
-
-}); 
+console.log(
+    "🛡️ ScamGuard AI frontend loaded successfully."
+);
