@@ -34,17 +34,25 @@ const VIRUSTOTAL_API_KEY = process.env.VIRUSTOTAL_API_KEY;
 // ==================================================
 
 function clampRisk(value) {
+
     const number = Number(value);
 
     if (!Number.isFinite(number)) {
         return 0;
     }
 
-    return Math.max(0, Math.min(100, Math.round(number)));
+    return Math.max(
+        0,
+        Math.min(
+            100,
+            Math.round(number)
+        )
+    );
 }
 
 
 function getRiskLevel(score) {
+
     if (score >= 70) {
         return "HIGH RISK";
     }
@@ -58,8 +66,11 @@ function getRiskLevel(score) {
 
 
 function cleanJSON(text) {
+
     if (!text || typeof text !== "string") {
-        throw new Error("AI returned an empty response.");
+        throw new Error(
+            "AI returned an empty response."
+        );
     }
 
     return text
@@ -70,13 +81,61 @@ function cleanJSON(text) {
 
 
 function safeJSONParse(text) {
+
     const cleaned = cleanJSON(text);
 
     try {
+
         return JSON.parse(cleaned);
+
     } catch {
-        throw new Error("AI returned invalid JSON.");
+
+        throw new Error(
+            "AI returned invalid JSON."
+        );
     }
+}
+
+
+// ==================================================
+// TIMEOUT HELPER
+// ==================================================
+
+function withTimeout(
+    promise,
+    milliseconds,
+    errorMessage
+) {
+
+    let timeoutId;
+
+    const timeoutPromise =
+        new Promise((_, reject) => {
+
+            timeoutId = setTimeout(
+                () => {
+
+                    reject(
+                        new Error(
+                            errorMessage
+                        )
+                    );
+
+                },
+                milliseconds
+            );
+
+        });
+
+
+    return Promise.race([
+        promise,
+        timeoutPromise
+    ]).finally(() => {
+
+        clearTimeout(timeoutId);
+
+    });
 }
 
 
@@ -88,11 +147,14 @@ function isPrivateIP(ip) {
 
     if (net.isIPv4(ip)) {
 
-        const parts = ip.split(".").map(Number);
+        const parts =
+            ip.split(".").map(Number);
 
-        const [a, b, c, d] = parts;
+        const [a, b, c, d] =
+            parts;
 
         return (
+
             // 10.0.0.0/8
             a === 10 ||
 
@@ -115,21 +177,34 @@ function isPrivateIP(ip) {
             a === 0 ||
 
             // Broadcast
-            (a === 255 && b === 255 && c === 255 && d === 255)
+            (
+                a === 255 &&
+                b === 255 &&
+                c === 255 &&
+                d === 255
+            )
+
         );
     }
 
 
     if (net.isIPv6(ip)) {
 
-        const normalized = ip.toLowerCase();
+        const normalized =
+            ip.toLowerCase();
 
         return (
+
             normalized === "::1" ||
+
             normalized === "::" ||
+
             normalized.startsWith("fc") ||
+
             normalized.startsWith("fd") ||
+
             normalized.startsWith("fe80:")
+
         );
     }
 
@@ -144,7 +219,9 @@ function isPrivateIP(ip) {
 
 async function checkHostnameSafety(hostname) {
 
-    const lowerHost = hostname.toLowerCase();
+    const lowerHost =
+        hostname.toLowerCase();
+
 
     if (
         lowerHost === "localhost" ||
@@ -153,9 +230,14 @@ async function checkHostnameSafety(hostname) {
     ) {
 
         return {
+
             safe: false,
-            reason: "Local/private hostname detected.",
+
+            reason:
+                "Local/private hostname detected.",
+
             resolvedIPs: []
+
         };
     }
 
@@ -165,63 +247,98 @@ async function checkHostnameSafety(hostname) {
         if (isPrivateIP(lowerHost)) {
 
             return {
+
                 safe: false,
-                reason: "Private/internal IP address detected.",
-                resolvedIPs: [lowerHost]
+
+                reason:
+                    "Private/internal IP address detected.",
+
+                resolvedIPs: [
+                    lowerHost
+                ]
+
             };
         }
 
+
         return {
+
             safe: true,
-            resolvedIPs: [lowerHost]
+
+            resolvedIPs: [
+                lowerHost
+            ]
+
         };
     }
 
 
     try {
 
-        const addresses = await dns.lookup(
-            hostname,
-            {
-                all: true,
-                verbatim: true
-            }
-        );
+        // DNS lookup is also time-limited
+        const addresses =
+            await withTimeout(
+                dns.lookup(
+                    hostname,
+                    {
+                        all: true,
+                        verbatim: true
+                    }
+                ),
+                2500,
+                "DNS lookup timed out."
+            );
 
 
-        const resolvedIPs = addresses.map(
-            item => item.address
-        );
+        const resolvedIPs =
+            addresses.map(
+                item => item.address
+            );
 
 
-        const privateAddress = resolvedIPs.find(
-            ip => isPrivateIP(ip)
-        );
+        const privateAddress =
+            resolvedIPs.find(
+                ip => isPrivateIP(ip)
+            );
 
 
         if (privateAddress) {
 
             return {
+
                 safe: false,
+
                 reason:
                     "Hostname resolves to a private/internal IP address.",
+
                 resolvedIPs
+
             };
         }
 
 
         return {
+
             safe: true,
+
             resolvedIPs
+
         };
 
     } catch (error) {
 
         return {
+
             safe: false,
+
             reason:
-                "DNS lookup failed or hostname could not be resolved.",
+                error.message ===
+                "DNS lookup timed out."
+                    ? "DNS lookup timed out."
+                    : "DNS lookup failed or hostname could not be resolved.",
+
             resolvedIPs: []
+
         };
     }
 }
@@ -233,28 +350,39 @@ async function checkHostnameSafety(hostname) {
 
 function normalizeURL(input) {
 
-    const trimmed = String(input || "").trim();
+    const trimmed =
+        String(input || "").trim();
+
 
     if (!trimmed) {
-        throw new Error("URL is required.");
+
+        throw new Error(
+            "URL is required."
+        );
     }
 
 
     let url = trimmed;
 
-    // Allow users to enter google.com without protocol.
+
+    // Allow google.com without protocol.
     if (!/^https?:\/\//i.test(url)) {
-        url = `https://${url}`;
+
+        url =
+            `https://${url}`;
+
     }
 
 
-    const parsed = new URL(url);
+    const parsed =
+        new URL(url);
 
 
     if (
         parsed.protocol !== "http:" &&
         parsed.protocol !== "https:"
     ) {
+
         throw new Error(
             "Only HTTP and HTTPS URLs are supported."
         );
@@ -278,60 +406,104 @@ async function checkVirusTotalURL(inputURL) {
         );
 
         return {
+
             available: false,
+
             found: false,
-            error: "VirusTotal API key is not configured."
+
+            error:
+                "VirusTotal API key is not configured."
+
         };
     }
 
 
     try {
 
-        const urlID = Buffer
-            .from(inputURL)
-            .toString("base64")
-            .replace(/\+/g, "-")
-            .replace(/\//g, "_")
-            .replace(/=+$/, "");
+        const urlID =
+            Buffer
+                .from(inputURL)
+                .toString("base64")
+                .replace(/\+/g, "-")
+                .replace(/\//g, "_")
+                .replace(/=+$/, "");
 
 
-        const response = await fetch(
-            `https://www.virustotal.com/api/v3/urls/${urlID}`,
-            {
-                method: "GET",
-                headers: {
-                    "x-apikey": VIRUSTOTAL_API_KEY,
-                    "accept": "application/json"
-                }
-            }
-        );
+        const controller =
+            new AbortController();
+
+
+        const timeout =
+            setTimeout(
+                () => controller.abort(),
+                3000
+            );
+
+
+        let response;
+
+
+        try {
+
+            response =
+                await fetch(
+                    `https://www.virustotal.com/api/v3/urls/${urlID}`,
+                    {
+                        method: "GET",
+
+                        headers: {
+
+                            "x-apikey":
+                                VIRUSTOTAL_API_KEY,
+
+                            "accept":
+                                "application/json"
+
+                        },
+
+                        signal:
+                            controller.signal
+
+                    }
+                );
+
+        } finally {
+
+            clearTimeout(timeout);
+
+        }
 
 
         if (response.status === 404) {
 
             return {
+
                 available: true,
+
                 found: false,
+
                 message:
                     "URL is not currently present in the VirusTotal database."
+
             };
         }
 
 
         if (!response.ok) {
 
-            const errorText = await response.text();
-
             throw new Error(
-                `VirusTotal API error ${response.status}: ${errorText}`
+                `VirusTotal API error ${response.status}`
             );
         }
 
 
-        const data = await response.json();
+        const data =
+            await response.json();
+
 
         const attributes =
             data?.data?.attributes || {};
+
 
         const stats =
             attributes.last_analysis_stats || {};
@@ -365,6 +537,7 @@ async function checkVirusTotalURL(inputURL) {
 
                 timeout:
                     stats.timeout || 0
+
             },
 
             finalURL:
@@ -381,6 +554,7 @@ async function checkVirusTotalURL(inputURL) {
 
             lastAnalysisDate:
                 attributes.last_analysis_date || null
+
         };
 
     } catch (error) {
@@ -390,6 +564,7 @@ async function checkVirusTotalURL(inputURL) {
             error.message
         );
 
+
         return {
 
             available: false,
@@ -397,7 +572,10 @@ async function checkVirusTotalURL(inputURL) {
             found: false,
 
             error:
-                "VirusTotal reputation check failed."
+                error.name === "AbortError"
+                    ? "VirusTotal request timed out."
+                    : "VirusTotal reputation check failed."
+
         };
     }
 }
@@ -409,10 +587,13 @@ async function checkVirusTotalURL(inputURL) {
 
 async function inspectURL(inputURL) {
 
-    const parsed = new URL(inputURL);
+    const parsed =
+        new URL(inputURL);
+
 
     const hostname =
         parsed.hostname.toLowerCase();
+
 
     const signals = [];
 
@@ -479,7 +660,8 @@ async function inspectURL(inputURL) {
 
     const hostnameMatches =
         suspiciousHostnamePatterns.filter(
-            pattern => pattern.test(hostname)
+            pattern =>
+                pattern.test(hostname)
         );
 
 
@@ -508,7 +690,9 @@ async function inspectURL(inputURL) {
     // ==================================================
 
     const hostnameParts =
-        hostname.split(".").filter(Boolean);
+        hostname
+            .split(".")
+            .filter(Boolean);
 
 
     if (hostnameParts.length >= 5) {
@@ -547,8 +731,41 @@ async function inspectURL(inputURL) {
     // DNS
     // ==================================================
 
+    const dnsCache =
+        new Map();
+
+
+    async function getCachedSafety(
+        targetHostname
+    ) {
+
+        const host =
+            targetHostname.toLowerCase();
+
+
+        if (dnsCache.has(host)) {
+
+            return dnsCache.get(host);
+
+        }
+
+
+        const promise =
+            checkHostnameSafety(host);
+
+
+        dnsCache.set(
+            host,
+            promise
+        );
+
+
+        return promise;
+    }
+
+
     const dnsResult =
-        await checkHostnameSafety(hostname);
+        await getCachedSafety(hostname);
 
 
     if (!dnsResult.safe) {
@@ -574,24 +791,44 @@ async function inspectURL(inputURL) {
         finalURL: inputURL,
 
         redirects: []
+
     };
 
 
-    let currentURL = inputURL;
+    let currentURL =
+        inputURL;
 
 
     try {
 
-        for (let i = 0; i < 4; i++) {
+        // Maximum 2 redirects for speed.
+        for (let i = 0; i < 3; i++) {
 
             const currentParsed =
                 new URL(currentURL);
 
 
-            const currentSafety =
-                await checkHostnameSafety(
-                    currentParsed.hostname
-                );
+            let currentSafety;
+
+
+            // Re-use first DNS result instead
+            // of performing the same DNS lookup again.
+            if (
+                currentParsed.hostname.toLowerCase() ===
+                hostname
+            ) {
+
+                currentSafety =
+                    dnsResult;
+
+            } else {
+
+                currentSafety =
+                    await getCachedSafety(
+                        currentParsed.hostname
+                    );
+
+            }
 
 
             if (!currentSafety.safe) {
@@ -611,7 +848,7 @@ async function inspectURL(inputURL) {
             const timeout =
                 setTimeout(
                     () => controller.abort(),
-                    8000
+                    3000
                 );
 
 
@@ -620,26 +857,43 @@ async function inspectURL(inputURL) {
 
             try {
 
-                // HEAD is cheaper and safer.
-                response = await fetch(
-                    currentURL,
-                    {
-                        method: "HEAD",
-                        redirect: "manual",
-                        signal: controller.signal
-                    }
-                );
+                // HEAD is fast and does not download page content.
+                response =
+                    await fetch(
+                        currentURL,
+                        {
+
+                            method: "HEAD",
+
+                            redirect: "manual",
+
+                            signal:
+                                controller.signal,
+
+                            headers: {
+
+                                "User-Agent":
+                                    "ScamGuard-AI-URL-Scanner/1.0"
+
+                            }
+
+                        }
+                    );
 
             } finally {
 
                 clearTimeout(timeout);
+
             }
 
 
-            liveCheck.reachable = true;
+            liveCheck.reachable =
+                true;
+
 
             liveCheck.status =
                 response.status;
+
 
             liveCheck.statusText =
                 response.statusText;
@@ -651,11 +905,18 @@ async function inspectURL(inputURL) {
             ) {
 
                 const location =
-                    response.headers.get("location");
+                    response.headers.get(
+                        "location"
+                    );
 
 
                 if (!location) {
+
+                    liveCheck.finalURL =
+                        currentURL;
+
                     break;
+
                 }
 
 
@@ -685,7 +946,7 @@ async function inspectURL(inputURL) {
 
 
                 const nextSafety =
-                    await checkHostnameSafety(
+                    await getCachedSafety(
                         nextParsed.hostname
                     );
 
@@ -716,16 +977,31 @@ async function inspectURL(inputURL) {
             liveCheck.finalURL =
                 currentURL;
 
+
             break;
         }
 
     } catch (error) {
 
-        liveCheck.reachable = false;
+        liveCheck.reachable =
+            false;
 
-        signals.push(
-            "Live server check could not be completed."
-        );
+
+        if (
+            error.name === "AbortError"
+        ) {
+
+            signals.push(
+                "Live server check timed out."
+            );
+
+        } else {
+
+            signals.push(
+                "Live server check could not be completed."
+            );
+
+        }
     }
 
 
@@ -741,11 +1017,13 @@ async function inspectURL(inputURL) {
 
     return {
 
-        originalURL: inputURL,
+        originalURL:
+            inputURL,
 
         hostname,
 
-        protocol: parsed.protocol,
+        protocol:
+            parsed.protocol,
 
         port:
             parsed.port ||
@@ -761,6 +1039,7 @@ async function inspectURL(inputURL) {
         signals,
 
         liveCheck
+
     };
 }
 
@@ -916,6 +1195,7 @@ function calculateURLRisk(
         const malicious =
             virusTotal.analysisStats?.malicious || 0;
 
+
         const suspicious =
             virusTotal.analysisStats?.suspicious || 0;
 
@@ -991,6 +1271,7 @@ function calculateURLRisk(
             getRiskLevel(score),
 
         reasons
+
     };
 }
 
@@ -1032,11 +1313,7 @@ Risk levels:
 30-69 = SUSPICIOUS
 70-100 = HIGH RISK
 
-Important:
-
-ScamGuard has already calculated a deterministic technical risk score.
-
-Base risk:
+ScamGuard technical base risk:
 ${riskEngine.score}/100
 
 Base level:
@@ -1045,14 +1322,10 @@ ${riskEngine.level}
 Base reasons:
 ${riskEngine.reasons.join("\n") || "None"}
 
-Use the base risk as strong evidence.
-
-VirusTotal evidence:
-
-Available:
+VirusTotal available:
 ${virusTotal.available}
 
-Found:
+VirusTotal found:
 ${virusTotal.found ?? "Unknown"}
 
 Malicious detections:
@@ -1104,6 +1377,7 @@ ${inspection.liveCheck.redirects.join("\n") || "None"}
 
 Rules:
 
+- Use the deterministic base risk as strong evidence.
 - Do not call a URL safe simply because VirusTotal has no record.
 - Do not call a URL malicious because of only one suspicious word.
 - Multiple malicious VirusTotal detections are strong evidence.
@@ -1115,71 +1389,68 @@ Rules:
 `;
 
 
-    const controller =
-        new AbortController();
+    // Real request timeout.
+    // The previous AbortController was created but
+    // was never attached to the Gemini request.
+
+    const geminiPromise =
+        gemini.models.generateContent({
+
+            model:
+                process.env.GEMINI_MODEL ||
+                "gemini-2.5-flash",
+
+            contents:
+                prompt,
+
+            config: {
+
+                temperature: 0.2,
+
+                responseMimeType:
+                    "application/json"
+
+            }
+
+        });
 
 
-    const timeout =
-        setTimeout(
-            () => controller.abort(),
-            10000
+    const response =
+        await withTimeout(
+            geminiPromise,
+            4000,
+            "Gemini URL analysis timed out."
         );
 
 
-    try {
-
-        const response =
-            await gemini.models.generateContent({
-
-                model:
-                    process.env.GEMINI_MODEL ||
-                    "gemini-2.5-flash",
-
-                contents:
-                    prompt,
-
-                config: {
-
-                    temperature: 0.2,
-
-                    responseMimeType:
-                        "application/json"
-                }
-            });
+    const result =
+        response.text;
 
 
-        const result =
-            response.text;
+    const data =
+        safeJSONParse(result);
 
 
-        const data =
-            safeJSONParse(result);
+    if (
+        typeof data.risk !== "number" ||
+        typeof data.explanation !== "string"
+    ) {
 
-
-        if (
-            typeof data.risk !== "number" ||
-            typeof data.explanation !== "string"
-        ) {
-
-            throw new Error(
-                "Gemini returned an invalid response format."
-            );
-        }
-
-
-        return {
-
-            risk:
-                clampRisk(data.risk),
-
-            explanation:
-                data.explanation.trim()
-        };
-
-    } finally {
-
-        clearTimeout(timeout);
+        throw new Error(
+            "Gemini returned an invalid response format."
+        );
     }
+
+
+    return {
+
+        risk:
+            clampRisk(data.risk),
+
+        explanation:
+            data.explanation.trim()
+
+    };
 }
 
 
@@ -1205,6 +1476,7 @@ app.post(
 
                     error:
                         "Message is required."
+
                 });
             }
 
@@ -1215,6 +1487,7 @@ app.post(
 
                     error:
                         "Message is too long."
+
                 });
             }
 
@@ -1229,9 +1502,11 @@ app.post(
 
                         {
 
-                            role: "system",
+                            role:
+                                "system",
 
                             content: `
+
 You are ScamGuard AI, a cybersecurity scam-message detector.
 
 Return ONLY valid JSON:
@@ -1258,25 +1533,30 @@ Look for:
 - unusual payment requests
 
 Do not assume every link is malicious.
+
 `
+
                         },
 
                         {
 
-                            role: "user",
+                            role:
+                                "user",
 
                             content:
                                 message
+
                         }
+
                     ]
+
                 });
 
 
             const result =
                 completion
                     .choices?.[0]
-                    ?.message
-                    ?.content;
+                    ?.message?.content;
 
 
             const data =
@@ -1310,6 +1590,7 @@ Do not assume every link is malicious.
 
                 aiEngine:
                     "DeepSeek"
+
             });
 
         } catch (error) {
@@ -1324,6 +1605,7 @@ Do not assume every link is malicious.
 
                 error:
                     "DeepSeek message analysis failed."
+
             });
         }
     }
@@ -1345,15 +1627,18 @@ app.post(
                     req.body?.sender || ""
                 ).trim();
 
+
             const subject =
                 String(
                     req.body?.subject || ""
                 ).trim();
 
+
             const body =
                 String(
                     req.body?.body || ""
                 ).trim();
+
 
             const link =
                 String(
@@ -1367,6 +1652,7 @@ app.post(
 
                     error:
                         "Sender, subject and email body are required."
+
                 });
             }
 
@@ -1382,6 +1668,7 @@ app.post(
 
                     error:
                         "One or more email fields are too long."
+
                 });
             }
 
@@ -1396,9 +1683,11 @@ app.post(
 
                         {
 
-                            role: "system",
+                            role:
+                                "system",
 
                             content: `
+
 You are ScamGuard AI, a cybersecurity email scam detector.
 
 Return ONLY valid JSON:
@@ -1434,14 +1723,18 @@ Look for:
 - suspicious domains
 
 Do not assume an email is malicious merely because it contains a link.
+
 `
+
                         },
 
                         {
 
-                            role: "user",
+                            role:
+                                "user",
 
                             content: `
+
 Sender:
 ${sender}
 
@@ -1453,17 +1746,20 @@ ${body}
 
 Link:
 ${link || "No link provided"}
+
 `
+
                         }
+
                     ]
+
                 });
 
 
             const result =
                 completion
                     .choices?.[0]
-                    ?.message
-                    ?.content;
+                    ?.message?.content;
 
 
             const data =
@@ -1497,6 +1793,7 @@ ${link || "No link provided"}
 
                 aiEngine:
                     "DeepSeek"
+
             });
 
         } catch (error) {
@@ -1511,6 +1808,7 @@ ${link || "No link provided"}
 
                 error:
                     "DeepSeek email analysis failed."
+
             });
         }
     }
@@ -1524,6 +1822,10 @@ ${link || "No link provided"}
 app.post(
     "/check-url",
     async (req, res) => {
+
+        const scanStart =
+            Date.now();
+
 
         try {
 
@@ -1539,6 +1841,7 @@ app.post(
 
                     error:
                         "URL is required."
+
                 });
             }
 
@@ -1551,16 +1854,18 @@ app.post(
                 url =
                     normalizeURL(rawURL);
 
-            } catch (error) {
+            } catch {
 
                 return res.status(400).json({
 
                     error:
                         "Please provide a valid HTTP or HTTPS URL."
+
                 });
             }
 
 
+            console.log("");
             console.log(
                 "🔗 URL received:",
                 url
@@ -1568,24 +1873,30 @@ app.post(
 
 
             // ==================================================
-            // LIVE INSPECTION
+            // RUN INSPECTION + VIRUSTOTAL IN PARALLEL
             // ==================================================
 
-            const inspection =
-                await inspectURL(url);
+            console.log(
+                "⚡ Starting parallel URL checks..."
+            );
+
+
+            const [
+                inspection,
+                virusTotal
+            ] =
+                await Promise.all([
+
+                    inspectURL(url),
+
+                    checkVirusTotalURL(url)
+
+                ]);
 
 
             console.log(
                 "🔎 URL Inspection completed."
             );
-
-
-            // ==================================================
-            // VIRUSTOTAL
-            // ==================================================
-
-            const virusTotal =
-                await checkVirusTotalURL(url);
 
 
             console.log(
@@ -1626,6 +1937,11 @@ app.post(
                         riskEngine
                     );
 
+
+                console.log(
+                    "🤖 Gemini URL analysis completed."
+                );
+
             } catch (error) {
 
                 console.error(
@@ -1634,9 +1950,8 @@ app.post(
                 );
 
 
-                // If Gemini fails, use deterministic
-                // ScamGuard risk instead of failing
-                // the entire URL scanner.
+                // Use deterministic risk if Gemini
+                // is slow or unavailable.
 
                 geminiResult = {
 
@@ -1647,6 +1962,7 @@ app.post(
                         riskEngine.reasons.length > 0
                             ? riskEngine.reasons.join(" ")
                             : "No major technical risk indicators were detected."
+
                 };
             }
 
@@ -1661,6 +1977,16 @@ app.post(
                 getRiskLevel(
                     finalRisk
                 );
+
+
+            const totalTime =
+                Date.now() -
+                scanStart;
+
+
+            console.log(
+                `✅ URL scan completed in ${totalTime} ms`
+            );
 
 
             // ==================================================
@@ -1680,6 +2006,9 @@ app.post(
 
                 explanation:
                     geminiResult.explanation,
+
+                scanTime:
+                    totalTime,
 
                 details: {
 
@@ -1711,6 +2040,7 @@ app.post(
 
                         reasons:
                             riskEngine.reasons
+
                     },
 
                     virusTotal:
@@ -1718,7 +2048,9 @@ app.post(
 
                     aiEngine:
                         "Gemini"
+
                 }
+
             });
 
         } catch (error) {
@@ -1736,6 +2068,7 @@ app.post(
 
                 details:
                     error.message
+
             });
         }
     }
@@ -1772,6 +2105,7 @@ app.get(
                 Boolean(
                     process.env.VIRUSTOTAL_API_KEY
                 )
+
         });
     }
 );
@@ -1786,6 +2120,7 @@ app.listen(
     () => {
 
         console.log("");
+
         console.log(
             "=============================================="
         );
